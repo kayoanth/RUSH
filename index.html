@@ -228,22 +228,25 @@
             </div>
         </div>
 
-        <!-- ETAPA 1.5: LOBBY MULTIPLAYER (VERCEL P2P + SOCKET.IO) -->
-        <div id="menuMultiplayerLobby" class="hidden flex-col max-w-4xl w-full mx-auto mt-6 mb-auto z-10 p5-modal-in shrink-0 bg-black/95 border-4 border-blue-500 p-6 shadow-[10px_10px_0px_#000]">
-            <div class="flex flex-wrap justify-between items-center gap-4 border-b-2 border-blue-800 pb-4 mb-4">
+        <!-- ETAPA 1.5: NAVEGADOR DE SERVIDORES MULTIPLAYER -->
+        <div id="menuMultiplayerLobby" class="hidden flex-col max-w-5xl w-full mx-auto mt-4 mb-auto z-10 p5-modal-in shrink-0 bg-black/95 border-4 border-blue-500 p-4 sm:p-6 shadow-[10px_10px_0px_#000]">
+            <div class="flex flex-wrap justify-between items-center gap-3 border-b-2 border-blue-800 pb-4 mb-4">
                 <div>
-                    <h2 class="text-2xl sm:text-3xl font-p5 text-white uppercase" style="text-shadow: 2px 2px 0 #1d4ed8;">SALAS MULTIPLAYER</h2>
+                    <h2 class="text-2xl sm:text-3xl font-p5 text-white uppercase" style="text-shadow: 2px 2px 0 #1d4ed8;">SERVIDORES & SALAS ATIVAS</h2>
                     <p id="socketConnectionStatus" class="text-xs text-emerald-400 font-bold mt-1">Preparando rede Vercel P2P...</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                     <input type="text" id="mpPlayerNameInput" maxlength="12" placeholder="SEU APELIDO" class="bg-zinc-900 border-2 border-yellow-400 text-yellow-300 font-bold text-xs sm:text-sm px-3 py-2 w-32 sm:w-36 uppercase focus:outline-none">
                     <div class="flex items-center bg-zinc-900 border-2 border-blue-400">
-                        <input type="text" id="joinRoomCodeInput" maxlength="6" placeholder="CÓDIGO (EX: A1B2C3)" class="bg-transparent text-white font-mono font-bold text-xs sm:text-sm px-3 py-2 w-40 sm:w-48 uppercase focus:outline-none">
-                        <button onclick="joinByRoomCode()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-2 border-l-2 border-blue-400 uppercase text-xs sm:text-sm">
+                        <input type="text" id="joinRoomCodeInput" maxlength="6" placeholder="CÓDIGO (EX: A1B2C3)" class="bg-transparent text-white font-mono font-bold text-xs sm:text-sm px-3 py-2 w-36 sm:w-44 uppercase focus:outline-none">
+                        <button onclick="joinByRoomCode()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-2 border-l-2 border-blue-400 uppercase text-xs sm:text-sm cursor-pointer">
                             ENTRAR
                         </button>
                     </div>
-                    <button onclick="openCreateRoomModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2 border-2 border-white shadow-[4px_4px_0px_#000] uppercase text-xs sm:text-sm">
+                    <button onclick="refreshServerBrowser()" title="Atualizar Lista de Salas" class="bg-zinc-800 hover:bg-zinc-700 text-blue-300 font-bold px-3 py-2 border-2 border-blue-400 uppercase text-xs sm:text-sm cursor-pointer">
+                        ATUALIZAR
+                    </button>
+                    <button onclick="openCreateRoomModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2 border-2 border-white shadow-[4px_4px_0px_#000] uppercase text-xs sm:text-sm cursor-pointer">
                         + CRIAR SALA
                     </button>
                 </div>
@@ -251,46 +254,77 @@
             <div class="flex flex-wrap items-center gap-2 bg-zinc-900/90 border border-blue-900 p-2.5 mb-3">
                 <span class="text-[10px] sm:text-xs font-bold text-blue-300 uppercase">SOCKET.IO OPCIONAL (HTTPS):</span>
                 <input type="text" id="mpServerUrlInput" value="" placeholder="Automático no Vercel (ou cole https://seu-servidor.onrender.com)" class="flex-1 min-w-[200px] bg-black border border-zinc-700 text-white font-mono text-xs px-2.5 py-1.5 focus:outline-none focus:border-blue-400">
-                <button onclick="reconnectMultiplayerServer()" class="bg-blue-700 hover:bg-blue-600 text-white font-bold px-3 py-1.5 border border-white text-xs uppercase">
+                <button onclick="reconnectMultiplayerServer()" class="bg-blue-700 hover:bg-blue-600 text-white font-bold px-3 py-1.5 border border-white text-xs uppercase cursor-pointer">
                     CONECTAR
                 </button>
             </div>
             <div id="lobbyCodeFeedback" class="hidden mb-3 px-3 py-2 text-xs font-bold border-2"></div>
             <div id="roomListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[340px] overflow-y-auto pr-1">
-                <p class="text-gray-400 text-sm col-span-2 text-center py-8">No Vercel, clique em "+ CRIAR SALA" e compartilhe o código de 6 letras com seus amigos!</p>
+                <p class="text-gray-400 text-sm col-span-2 text-center py-8">Buscando servidores ativos... Clique em "+ CRIAR SALA" ou digite o código acima!</p>
             </div>
         </div>
 
-        <!-- ETAPA 1.5: LOBBY MULTIPLAYER (SOCKET.IO) -->
-        <div id="menuMultiplayerLobby" class="hidden flex-col max-w-4xl w-full mx-auto mt-6 mb-auto z-10 p5-modal-in shrink-0 bg-black/95 border-4 border-blue-500 p-6 shadow-[10px_10px_0px_#000]">
-            <div class="flex flex-wrap justify-between items-center gap-4 border-b-2 border-blue-800 pb-4 mb-4">
+        <!-- ETAPA 1.6: SALA DE ESPERA (LOBBY DO SERVIDOR) -->
+        <div id="menuRoomLobbyWait" class="hidden flex-col max-w-5xl w-full mx-auto mt-4 mb-auto z-10 p5-modal-in shrink-0 bg-black/95 border-4 border-blue-500 p-4 sm:p-6 shadow-[10px_10px_0px_#000]">
+            <!-- Cabeçalho da Sala -->
+            <div class="flex flex-wrap justify-between items-center gap-3 border-b-2 border-blue-800 pb-4 mb-4">
                 <div>
-                    <h2 class="text-2xl sm:text-3xl font-p5 text-white uppercase" style="text-shadow: 2px 2px 0 #1d4ed8;">SALAS MULTIPLAYER</h2>
-                    <p id="socketConnectionStatus" class="text-xs text-yellow-400 font-bold mt-1">Conectando ao servidor...</p>
-                </div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <input type="text" id="mpPlayerNameInput" maxlength="12" placeholder="SEU APELIDO" class="bg-zinc-900 border-2 border-yellow-400 text-yellow-300 font-bold text-xs sm:text-sm px-3 py-2 w-32 sm:w-36 uppercase focus:outline-none">
-                    <div class="flex items-center bg-zinc-900 border-2 border-blue-400">
-                        <input type="text" id="joinRoomCodeInput" maxlength="6" placeholder="CÓDIGO (EX: A1B2C3)" class="bg-transparent text-white font-mono font-bold text-xs sm:text-sm px-3 py-2 w-40 sm:w-48 uppercase focus:outline-none">
-                        <button onclick="joinByRoomCode()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-2 border-l-2 border-blue-400 uppercase text-xs sm:text-sm">
-                            ENTRAR
-                        </button>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="bg-blue-600 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 border border-white uppercase">LOBBY DA SALA</span>
+                        <span id="lobbyRoomDiffBadge" class="bg-yellow-400 text-black text-[10px] sm:text-xs font-bold px-2 py-0.5 border border-black uppercase">DIFICULDADE: NORMAL</span>
+                        <span id="lobbyPlayersCountBadge" class="bg-emerald-950 text-emerald-300 border border-emerald-500 text-[10px] sm:text-xs font-bold px-2 py-0.5 uppercase">1 / 4 JOGADORES</span>
                     </div>
-                    <button onclick="openCreateRoomModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2 border-2 border-white shadow-[4px_4px_0px_#000] uppercase text-xs sm:text-sm">
-                        + CRIAR SALA
+                    <h2 id="lobbyRoomTitle" class="text-2xl sm:text-3xl font-p5 text-white uppercase mt-1" style="text-shadow: 2px 2px 0 #1d4ed8;">SALA DOS LADRÕES</h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="copyCurrentRoomCode()" class="bg-zinc-900 hover:bg-blue-900 text-blue-300 border-2 border-blue-400 px-3 py-2 text-xs font-mono font-bold uppercase shadow-[3px_3px_0px_#000] cursor-pointer">
+                        CÓDIGO: <span id="lobbyRoomCodeBadge" class="text-white">#------</span> (COPIAR)
+                    </button>
+                    <button onclick="leaveWaitingLobby()" class="bg-red-700 hover:bg-red-600 text-white border-2 border-white px-3 py-2 text-xs font-bold uppercase shadow-[3px_3px_0px_#000] cursor-pointer">
+                        SAIR DA SALA
                     </button>
                 </div>
             </div>
-            <div class="flex flex-wrap items-center gap-2 bg-zinc-900/90 border border-blue-900 p-2.5 mb-3">
-                <span class="text-[10px] sm:text-xs font-bold text-blue-300 uppercase">SERVIDOR SOCKET.IO:</span>
-                <input type="text" id="mpServerUrlInput" value="http://localhost:3000" placeholder="https://seu-servidor.onrender.com" class="flex-1 min-w-[200px] bg-black border border-zinc-700 text-white font-mono text-xs px-2.5 py-1.5 focus:outline-none focus:border-blue-400">
-                <button onclick="reconnectMultiplayerServer()" class="bg-blue-700 hover:bg-blue-600 text-white font-bold px-3 py-1.5 border border-white text-xs uppercase">
-                    CONECTAR
-                </button>
+
+            <!-- Grid Principal: Jogadores no Lobby + Chat -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                <!-- Lista de Slots de Jogadores (2 colunas no desktop) -->
+                <div class="lg:col-span-2 flex flex-col gap-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-blue-300 uppercase">JOGADORES NA SALA</span>
+                        <button onclick="openLobbyStatsEditor()" class="bg-amber-500 hover:bg-amber-400 text-black font-bold px-3 py-1 border border-white text-xs uppercase shadow-[2px_2px_0px_#000] cursor-pointer">
+                            DISTRIBUIR STATUS (<span id="lobbyLocalPointsBadge">16</span> PTS)
+                        </button>
+                    </div>
+                    <div id="lobbyPlayersGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Preenchido dinamicamente pelo JS -->
+                    </div>
+                </div>
+
+                <!-- Chat do Lobby -->
+                <div class="bg-zinc-950 border-2 border-zinc-700 p-3 flex flex-col h-[270px]">
+                    <div class="text-xs font-bold text-yellow-400 border-b border-zinc-800 pb-1.5 mb-2 uppercase">CHAT DO LOBBY</div>
+                    <div id="lobbyChatMessages" class="flex-1 overflow-y-auto space-y-1.5 text-xs pr-1 mb-2">
+                        <p class="text-gray-400 italic">Bem-vindo ao lobby! Prepare sua classe e clique em PRONTO.</p>
+                    </div>
+                    <form onsubmit="sendLobbyChat(event)" class="flex gap-1.5">
+                        <input type="text" id="lobbyChatInput" maxlength="80" placeholder="Mensagem..." class="flex-1 bg-black border border-zinc-600 text-white text-xs px-2.5 py-1.5 focus:outline-none focus:border-blue-400">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 border border-white text-xs uppercase cursor-pointer">OK</button>
+                    </form>
+                </div>
             </div>
-            <div id="lobbyCodeFeedback" class="hidden mb-3 px-3 py-2 text-xs font-bold border-2"></div>
-            <div id="roomListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[340px] overflow-y-auto pr-1">
-                <p class="text-gray-400 text-sm col-span-2 text-center py-8">Buscando salas ativas no servidor...</p>
+
+            <!-- Rodapé do Lobby: Botão Pronto e Iniciar Partida -->
+            <div class="flex flex-wrap items-center justify-between gap-3 bg-zinc-900 border-2 border-zinc-700 p-3">
+                <p id="lobbyFooterHint" class="text-xs text-gray-300 font-bold">Clique em "ESTOU PRONTO!" quando finalizar sua classe e status.</p>
+                <div class="flex flex-wrap items-center gap-3 ml-auto">
+                    <button id="btnLobbyReady" onclick="toggleLobbyReady()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-p5 text-sm sm:text-base px-5 py-2.5 border-2 border-white shadow-[4px_4px_0px_#000] uppercase cursor-pointer">
+                        ESTOU PRONTO!
+                    </button>
+                    <button id="btnLobbyStart" onclick="hostStartLobbyMatch()" class="hidden bg-red-600 hover:bg-red-500 text-white font-p5 text-sm sm:text-base px-6 py-2.5 border-2 border-white shadow-[4px_4px_0px_#000] uppercase cursor-pointer">
+                        INICIAR PARTIDA
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -398,7 +432,7 @@
                         <button onclick="randomizeMenuStats()" class="sm:w-2/5 bg-amber-500 hover:bg-amber-400 active:translate-y-0.5 text-black font-p5 text-sm sm:text-base py-3 px-4 border-4 border-white uppercase shadow-[4px_4px_0px_#000] transition-all flex items-center justify-center gap-2 cursor-pointer">
                             <span>RANDOMIZAR</span>
                         </button>
-                        <button onclick="confirmMenuStatsAndLaunch()" class="sm:w-3/5 bg-red-600 hover:bg-red-500 active:translate-y-0.5 text-white font-p5 text-base sm:text-xl py-3 px-4 border-4 border-white uppercase shadow-[4px_4px_0px_#000] transition-all flex items-center justify-center cursor-pointer">
+                        <button id="btnConfirmMenuStats" onclick="confirmMenuStatsAndLaunch()" class="sm:w-3/5 bg-red-600 hover:bg-red-500 active:translate-y-0.5 text-white font-p5 text-base sm:text-xl py-3 px-4 border-4 border-white uppercase shadow-[4px_4px_0px_#000] transition-all flex items-center justify-center cursor-pointer">
                             INICIAR HORDA
                         </button>
                     </div>
@@ -411,7 +445,7 @@
                 ← VOLTAR
             </button>
             <div id="menuStatusText" class="font-p5alt text-yellow-400 text-[10px] sm:text-xs ml-auto">
-                RUSH! SURVIVAL ENGINE v2.0 (SOCKET.IO)
+                RUSH! SURVIVAL ENGINE v2.5 (MULTIPLAYER LOBBY)
             </div>
         </div>
     </div>
@@ -445,8 +479,8 @@
                 </div>
             </div>
             <div class="flex gap-3 mt-6">
-                <button onclick="submitCreateRoom()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 border-2 border-white uppercase">CRIAR</button>
-                <button onclick="hideUI('createRoomModal')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2.5 border-2 border-white uppercase">CANCELAR</button>
+                <button onclick="submitCreateRoom()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 border-2 border-white uppercase cursor-pointer">CRIAR LOBBY</button>
+                <button onclick="hideUI('createRoomModal')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2.5 border-2 border-white uppercase cursor-pointer">CANCELAR</button>
             </div>
         </div>
     </div>
@@ -459,6 +493,18 @@
             <div class="flex gap-3">
                 <button onclick="executeDeleteSlot()" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 border-2 border-white uppercase text-xs">SIM, APAGAR</button>
                 <button onclick="hideUI('deleteConfirmModal')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2.5 border-2 border-white uppercase text-xs">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO DE PONTOS NÃO GASTOS -->
+    <div id="autoBalanceConfirmModal" class="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4 opacity-0 invisible pointer-events-none transition-opacity duration-200">
+        <div class="bg-zinc-950 border-4 border-yellow-400 p-6 max-w-md w-full text-center shadow-[8px_8px_0px_#000]">
+            <h2 class="text-2xl font-p5 text-yellow-400 mb-2 uppercase">PONTOS RESTANTES!</h2>
+            <p class="text-xs sm:text-sm text-gray-300 mb-6">Você ainda tem <span id="unspentPointsModalCount" class="text-yellow-400 font-bold">0</span> pontos não distribuídos. Deseja distribuir automaticamente?</p>
+            <div class="flex gap-3">
+                <button onclick="confirmAutoBalanceAndLaunch()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 border-2 border-white uppercase text-xs">DISTRIBUIR E CONTINUAR</button>
+                <button onclick="cancelAutoBalanceModal()" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2.5 border-2 border-white uppercase text-xs">VOLTAR</button>
             </div>
         </div>
     </div>
@@ -484,7 +530,138 @@
                 </div>
 
                 <div class="bg-[#1f242e] p-4 text-xs font-bold text-white space-y-2 mt-auto border-2 border-[#3b4252]">
-                    <div class="flex justify-between"><span class="text-red-400">♥ VIDA MÁX</span> <span id="invStatHp">100</span></div>
+                    <div class="flex justify-between"><span class="text-red-400">VIDA MÁX</span> <span id="invStatHp">100</span></div>
+                    <div class="flex justify-between"><span class="text-cyan-400">ENERGIA MÁX</span> <span id="invStatSta">100</span></div>
+                    <div class="flex justify-between"><span class="text-amber-400">MULTIPLICADOR DANO</span> <span id="invStatDmg">x1.00</span></div>
+                    <div class="flex justify-between"><span class="text-emerald-400">VELOCIDADE</span> <span id="invStatSpd">240</span></div>
+                    <div class="flex justify-between border-t border-[#3b4252] pt-2"><span class="text-yellow-400">OURO</span> <span id="invStatGold">0 G</span></div>
+                </div>
+            </div>
+
+            <div class="w-full md:w-2/3 inv-panel-new p-4 flex flex-col h-full">
+                <div class="flex justify-between items-center mb-3 border-b-2 border-[#4c566a] pb-2">
+                    <h3 class="text-xl font-black text-white uppercase tracking-widest">MOCHILA DO AVENTUREIRO</h3>
+                    <button onclick="closeInventory()" class="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-1 border-2 border-white text-xs uppercase">FECHAR (I)</button>
+                </div>
+                <div id="invGrid" class="grid grid-cols-6 sm:grid-cols-8 gap-2 mb-4 overflow-y-auto"></div>
+                <div class="mt-auto bg-[#1f242e] border-2 border-[#3b4252] p-4 min-h-[130px] flex items-center justify-between gap-4">
+                    <div id="invEmptyDetails" class="text-gray-400 text-xs uppercase w-full text-center">Selecione um item da mochila ou equipado para ver detalhes.</div>
+                    <div id="invItemDetails" class="hidden flex items-center justify-between w-full gap-4">
+                        <div class="flex items-center gap-4">
+                            <div id="invDetailIcon" class="w-14 h-14 bg-black border-2 border-[#4c566a] flex items-center justify-center shrink-0"></div>
+                            <div>
+                                <h4 id="invDetailName" class="text-base font-bold text-white uppercase">ITEM</h4>
+                                <span id="invDetailRarity" class="text-[10px] font-bold px-2 py-0.5 border inline-block mt-1 uppercase">COMUM</span>
+                                <p id="invDetailDesc" class="text-xs text-gray-300 mt-1">Descrição</p>
+                            </div>
+                        </div>
+                        <button id="invEquipBtn" onclick="handleInventoryAction()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 border-2 border-white text-xs uppercase shrink-0">EQUIPAR</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE STATUS IN-GAME -->
+    <div id="statsModal" class="absolute inset-0 z-40 bg-black/90 flex items-center justify-center p-4 opacity-0 invisible pointer-events-none transition-opacity duration-200">
+        <div class="bg-zinc-950 border-4 border-emerald-500 p-6 max-w-lg w-full shadow-[8px_8px_0px_#000]">
+            <div class="flex justify-between items-center border-b-2 border-zinc-800 pb-3 mb-4">
+                <h2 class="text-2xl font-p5 text-emerald-400 uppercase">ATRIBUTOS DO HERÓI</h2>
+                <button onclick="closeStatsMenu()" class="bg-red-600 hover:bg-red-500 text-white font-bold px-3 py-1 border border-white text-xs uppercase">FECHAR (C)</button>
+            </div>
+            <p class="text-yellow-400 font-bold text-sm mb-4">PONTOS DISPONÍVEIS: <span id="inGameStatPoints" class="text-white text-lg">0</span></p>
+            <div class="space-y-3 text-xs sm:text-sm">
+                <div class="flex justify-between items-center bg-zinc-900 p-3 border border-zinc-700">
+                    <div><span class="font-bold text-white block">FORÇA (+15% DANO)</span><span class="text-gray-400">Nível: <span id="inGameValStr">1</span></span></div>
+                    <button onclick="spendInGameStat('str')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold w-8 h-8 border border-white">+</button>
+                </div>
+                <div class="flex justify-between items-center bg-zinc-900 p-3 border border-zinc-700">
+                    <div><span class="font-bold text-white block">VELOCIDADE (+20 VEL)</span><span class="text-gray-400">Nível: <span id="inGameValSpd">1</span></span></div>
+                    <button onclick="spendInGameStat('spd')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold w-8 h-8 border border-white">+</button>
+                </div>
+                <div class="flex justify-between items-center bg-zinc-900 p-3 border border-zinc-700">
+                    <div><span class="font-bold text-white block">DURABILIDADE (+45 HP)</span><span class="text-gray-400">Nível: <span id="inGameValDur">1</span></span></div>
+                    <button onclick="spendInGameStat('dur')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold w-8 h-8 border border-white">+</button>
+                </div>
+                <div class="flex justify-between items-center bg-zinc-900 p-3 border border-zinc-700">
+                    <div><span class="font-bold text-white block">ENERGIA (+20 MÁX)</span><span class="text-gray-400">Nível: <span id="inGameValSta">1</span></span></div>
+                    <button onclick="spendInGameStat('sta')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold w-8 h-8 border border-white">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DA LOJA DO MERCADOR -->
+    <div id="shopModal" class="absolute inset-0 z-40 bg-black/90 flex items-center justify-center p-4 opacity-0 invisible pointer-events-none transition-opacity duration-200">
+        <div class="bg-zinc-950 border-4 border-amber-500 p-6 max-w-3xl w-full shadow-[8px_8px_0px_#000]">
+            <div class="flex justify-between items-center border-b-2 border-zinc-800 pb-3 mb-4">
+                <div>
+                    <h2 class="text-2xl font-p5 text-amber-400 uppercase">MERCADOR DO LABIRINTO</h2>
+                    <p class="text-xs text-gray-400">Seu Ouro: <span id="shopGoldDisplay" class="text-yellow-400 font-bold">0</span> G</p>
+                </div>
+                <button onclick="closeShopModal()" class="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-1.5 border border-white text-xs uppercase">FECHAR</button>
+            </div>
+            <div id="shopItemsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pr-1"></div>
+        </div>
+    </div>
+
+    <!-- MODAL DE RECOMPENSA DE BAÚ -->
+    <div id="chestModal" class="absolute inset-0 z-40 bg-black/90 flex items-center justify-center p-4 opacity-0 invisible pointer-events-none transition-opacity duration-200">
+        <div class="bg-zinc-950 border-4 border-yellow-400 p-6 max-w-3xl w-full shadow-[8px_8px_0px_#000] text-center">
+            <h2 id="chestModalTitle" class="text-2xl sm:text-3xl font-p5 text-yellow-400 mb-2 uppercase">BAÚ ENCONTRADO!</h2>
+            <p class="text-xs text-gray-300 mb-5">Escolha 1 recompensa para adicionar à sua mochila:</p>
+            <div id="chestChoices" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+        </div>
+    </div>
+
+    <!-- MODAL ELEMENTOS DO ARCANISTA (M2) -->
+    <div id="mageWheelModal" class="absolute inset-0 z-40 bg-black/85 flex items-center justify-center p-4 opacity-0 invisible pointer-events-none transition-opacity duration-200">
+        <div class="bg-zinc-950 border-4 border-blue-500 p-6 max-w-md w-full text-center shadow-[8px_8px_0px_#000]">
+            <h2 class="text-2xl font-p5 text-blue-400 mb-4 uppercase">ESCOLHA O ELEMENTO</h2>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="setMageElement('fire')" class="bg-red-700 hover:bg-red-600 text-white font-bold py-4 border-2 border-white uppercase">FOGO</button>
+                <button onclick="setMageElement('water')" class="bg-sky-700 hover:bg-sky-600 text-white font-bold py-4 border-2 border-white uppercase">ÁGUA</button>
+                <button onclick="setMageElement('earth')" class="bg-amber-700 hover:bg-amber-600 text-white font-bold py-4 border-2 border-white uppercase">TERRA</button>
+                <button onclick="setMageElement('air')" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-4 border-2 border-white uppercase">VENTO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE PAUSE (INTERVALO) -->
+    <div id="pauseModal" class="absolute inset-0 z-50 bg-black/85 flex items-center justify-center p-4 opacity-0 invisible pointer-events-none transition-opacity duration-200">
+        <div class="bg-zinc-950 border-4 border-white p-6 max-w-sm w-full text-center shadow-[8px_8px_0px_#e60012]">
+            <h2 class="text-3xl font-p5 text-white mb-6 uppercase">JOGO PAUSADO</h2>
+            <div class="space-y-3">
+                <button onclick="resumeFromPauseModal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 border-2 border-white uppercase">CONTINUAR</button>
+                <button onclick="attemptReturnToMenu()" class="w-full bg-red-700 hover:bg-red-600 text-white font-bold py-3 border-2 border-white uppercase">VOLTAR AO MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE ABANDONO DE HORDA (COMBATE) -->
+    <div id="fleeModal" class="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4 opacity-0 invisible pointer-events-none transition-opacity duration-200">
+        <div class="bg-zinc-950 border-4 border-red-600 p-6 max-w-md w-full text-center shadow-[8px_8px_0px_#000]">
+            <h2 class="text-2xl font-p5 text-red-500 mb-2 uppercase">ABANDONAR HORDA?</h2>
+            <p class="text-xs sm:text-sm text-gray-300 mb-6">Se você fugir durante o combate, sofrerá penalidade de recuo na horda salva!</p>
+            <div class="flex gap-3">
+                <button onclick="abandonWaveAndExit()" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 border-2 border-white uppercase text-xs">FUGIR E SAIR</button>
+                <button onclick="resumeFromPauseModal()" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2.5 border-2 border-white uppercase text-xs">CONTINUAR LUTANDO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE GAME OVER -->
+    <div id="gameOverModal" class="absolute inset-0 z-50 bg-black/95 flex items-center justify-center p-4 opacity-0 invisible pointer-events-none transition-opacity duration-200">
+        <div class="bg-zinc-950 border-4 border-red-600 p-8 max-w-md w-full text-center shadow-[10px_10px_0px_#000]">
+            <h2 class="text-4xl font-p5 text-red-500 mb-2 uppercase" style="text-shadow: 3px 3px 0 #000;">VOCÊ CAIU!</h2>
+            <p class="text-xs sm:text-sm text-gray-300 mb-6">As sombras dominaram o labirinto.</p>
+            <div class="space-y-3">
+                <button onclick="restartGameFromGameOver()" class="w-full bg-red-600 hover:bg-red-500 text-white font-p5 text-lg py-3 border-2 border-white uppercase">REINICIAR HORDA</button>
+                <button onclick="returnToMainMenu()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 border-2 border-white uppercase text-xs">MENU PRINCIPAL</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MÓDULO DE CONEXÃO MULTIPLAYER (VERCEL WEBRTC P2P + SOCKET.IO + MULTI-ABAS) -->
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -497,6 +674,9 @@
         let isRoomHost = false;
         let currentRoomCode = null;
         let cachedRooms = [];
+        let lobbyState = null;
+        let lobbyAnnounceInterval = null;
+        const ROOMS_STORAGE_KEY = 'RUSH_ACTIVE_ROOMS_V1';
         const localPeerId = 'P_' + Math.random().toString(36).substring(2, 8).toUpperCase();
         const localChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('RUSH_MP_REALTIME_V1') : null;
         const isHostedHttps = window.location.protocol === 'https:';
@@ -515,38 +695,77 @@
             return code;
         }
 
+        function getStoredRooms() {
+            try {
+                const raw = localStorage.getItem(ROOMS_STORAGE_KEY);
+                const list = raw ? JSON.parse(raw) : [];
+                const now = Date.now();
+                return list.filter(r => now - (r.updatedAt || 0) < 25000);
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function upsertStoredRoom(roomObj) {
+            try {
+                const list = getStoredRooms().filter(r => r.code !== roomObj.code);
+                list.push({ ...roomObj, updatedAt: Date.now() });
+                localStorage.setItem(ROOMS_STORAGE_KEY, JSON.stringify(list));
+            } catch (e) {}
+        }
+
+        function removeStoredRoom(code) {
+            try {
+                const list = getStoredRooms().filter(r => r.code !== code);
+                localStorage.setItem(ROOMS_STORAGE_KEY, JSON.stringify(list));
+            } catch (e) {}
+        }
+
         function cleanupP2PNetwork() {
+            if (lobbyAnnounceInterval) {
+                clearInterval(lobbyAnnounceInterval);
+                lobbyAnnounceInterval = null;
+            }
+            if (isRoomHost && currentRoomCode) {
+                removeStoredRoom(currentRoomCode);
+            }
             p2pGuestConns.forEach(conn => { try { conn.close(); } catch (e) {} });
             p2pGuestConns.clear();
             if (p2pHostConn) { try { p2pHostConn.close(); } catch (e) {} p2pHostConn = null; }
             if (p2pPeer) { try { p2pPeer.destroy(); } catch (e) {} p2pPeer = null; }
         }
 
+        function mergeAndRenderRooms(incomingList) {
+            const map = new Map();
+            getStoredRooms().forEach(r => map.set(r.code, r));
+            (cachedRooms || []).forEach(r => map.set(r.code, r));
+            (incomingList || []).forEach(r => { if (r && r.code) map.set(r.code, r); });
+            cachedRooms = Array.from(map.values());
+            if (typeof renderMultiplayerRooms === 'function') {
+                renderMultiplayerRooms(cachedRooms);
+            }
+        }
+
         function handleIncomingRealtimeEvent(type, data) {
             if (!data) return;
 
             if (type === 'roomAnnounce' && data.room) {
-                const idx = cachedRooms.findIndex(r => r.code === data.room.code);
-                if (idx >= 0) cachedRooms[idx] = data.room;
-                else cachedRooms.push(data.room);
-                if (typeof renderMultiplayerRooms === 'function') renderMultiplayerRooms(cachedRooms);
+                upsertStoredRoom(data.room);
+                mergeAndRenderRooms([data.room]);
                 return;
             }
-            if (type === 'roomQuery' && isMultiplayer && isRoomHost && currentRoomCode && localChannel) {
-                localChannel.postMessage({
-                    type: 'roomAnnounce',
-                    payload: {
-                        room: {
-                            code: currentRoomCode,
-                            roomName: document.getElementById('mpRoomName')?.value.trim() || `Sala #${currentRoomCode}`,
-                            hostName: getLocalPlayerName(),
-                            hasPassword: false,
-                            difficulty: document.getElementById('mpRoomDiff')?.value || 'normal',
-                            maxPlayers: parseInt(document.getElementById('mpRoomMax')?.value || '4', 10),
-                            playersCount: 1 + (typeof game !== 'undefined' && game.remotePlayers ? game.remotePlayers.size : 0)
-                        }
-                    }
-                });
+            if (type === 'roomClosed' && data.code) {
+                removeStoredRoom(data.code);
+                cachedRooms = cachedRooms.filter(r => r.code !== data.code);
+                mergeAndRenderRooms([]);
+                return;
+            }
+            if (type === 'roomQuery' && isMultiplayer && isRoomHost && currentRoomCode && lobbyState) {
+                const summary = buildLobbySummaryRoom();
+                upsertStoredRoom(summary);
+                if (localChannel) {
+                    localChannel.postMessage({ type: 'roomAnnounce', payload: { room: summary } });
+                }
                 return;
             }
 
@@ -554,6 +773,82 @@
             if (data.roomCode !== currentRoomCode) return;
             if (data.senderId === localPeerId) return;
 
+            // Eventos do Lobby (Sala de Espera)
+            if (type === 'lobbyJoin' && isRoomHost && lobbyState) {
+                if (lobbyState.players.length >= lobbyState.maxPlayers) {
+                    window.CloudSync.broadcast('lobbyFull', { targetId: data.senderId });
+                    return;
+                }
+                const existingIdx = lobbyState.players.findIndex(pl => pl.id === data.senderId);
+                const playerEntry = {
+                    id: data.senderId,
+                    name: data.name || 'JOGADOR',
+                    class: data.class || 'warrior',
+                    stats: data.stats || { str: 1, spd: 1, dur: 1, sta: 1 },
+                    unspentPoints: typeof data.unspentPoints === 'number' ? data.unspentPoints : 16,
+                    ready: false,
+                    isHost: false
+                };
+                if (existingIdx >= 0) lobbyState.players[existingIdx] = playerEntry;
+                else lobbyState.players.push(playerEntry);
+
+                appendLobbyChatMessage('SISTEMA', `${playerEntry.name} entrou na sala!`, true);
+                broadcastLobbySync();
+                return;
+            }
+
+            if (type === 'lobbyUpdatePlayer' && isRoomHost && lobbyState) {
+                const pl = lobbyState.players.find(p => p.id === data.senderId);
+                if (pl) {
+                    if (data.name) pl.name = data.name;
+                    if (data.class) pl.class = data.class;
+                    if (data.stats) pl.stats = data.stats;
+                    if (typeof data.unspentPoints === 'number') pl.unspentPoints = data.unspentPoints;
+                    if (typeof data.ready === 'boolean') pl.ready = data.ready;
+                    broadcastLobbySync();
+                }
+                return;
+            }
+
+            if (type === 'lobbySync' && !isRoomHost && data.lobby) {
+                lobbyState = data.lobby;
+                if (typeof renderWaitingLobby === 'function') renderWaitingLobby();
+                return;
+            }
+
+            if (type === 'lobbyChat') {
+                appendLobbyChatMessage(data.author || 'JOGADOR', data.text || '', false);
+                return;
+            }
+
+            if (type === 'lobbyKick' && data.targetId === localPeerId) {
+                leaveWaitingLobby();
+                showLobbyFeedback('Você foi removido da sala pelo anfitrião.', true);
+                return;
+            }
+
+            if (type === 'lobbyFull' && data.targetId === localPeerId) {
+                leaveWaitingLobby();
+                showLobbyFeedback('A sala atingiu o limite máximo de jogadores!', true);
+                return;
+            }
+
+            if (type === 'lobbyLeave' && isRoomHost && lobbyState) {
+                const leaving = lobbyState.players.find(p => p.id === data.senderId);
+                lobbyState.players = lobbyState.players.filter(p => p.id !== data.senderId);
+                if (leaving) appendLobbyChatMessage('SISTEMA', `${leaving.name} saiu do lobby.`, true);
+                broadcastLobbySync();
+                return;
+            }
+
+            if (type === 'lobbyStartGame' && !isRoomHost) {
+                if (typeof startLocalPlayerFromLobby === 'function') {
+                    startLocalPlayerFromLobby(data.difficulty || 'normal');
+                }
+                return;
+            }
+
+            // Eventos em Combate
             if (typeof game !== 'undefined' && game) {
                 if (type === 'playerState') {
                     game.remotePlayers.set(data.senderId, {
@@ -582,6 +877,12 @@
             };
         }
 
+        window.addEventListener('storage', (ev) => {
+            if (ev.key === ROOMS_STORAGE_KEY && menuStage === 'mp_lobby') {
+                mergeAndRenderRooms([]);
+            }
+        });
+
         window.CloudSync = {
             isCloudReady: true,
             init: async (customUrl) => {
@@ -596,17 +897,15 @@
                     urlInput.value = serverUrl;
                 }
 
-                // Se estiver no Vercel/HTTPS sem servidor Socket.io customizado, usa WebRTC P2P automaticamente
                 if (!serverUrl) {
                     if (statusEl) {
                         const envLabel = isVercelEnv ? 'VERCEL CLOUD P2P ATIVO' : 'REDE P2P ONLINE ATIVA';
-                        statusEl.innerText = `${envLabel} — Crie uma sala e compartilhe o código! (ID: ${localPeerId})`;
+                        statusEl.innerText = `${envLabel} — Crie uma sala ou entre em um servidor ativo! (ID: ${localPeerId})`;
                         statusEl.className = "text-xs text-emerald-400 font-bold mt-1";
                     }
                     return true;
                 }
 
-                // Evita bloqueio de Mixed Content em sites HTTPS (como Vercel)
                 if (isHostedHttps && serverUrl.startsWith('http://')) {
                     if (statusEl) {
                         statusEl.innerText = `Aviso HTTPS: Use wss:// ou https:// no servidor externo. Rede Vercel P2P continua ativa!`;
@@ -648,6 +947,13 @@
                         socket.on("worldSync", (d) => handleIncomingRealtimeEvent("worldSync", d));
                         socket.on("enemyHit", (d) => handleIncomingRealtimeEvent("enemyHit", d));
                         socket.on("playerLeft", (d) => handleIncomingRealtimeEvent("playerLeft", d));
+                        socket.on("lobbyJoin", (d) => handleIncomingRealtimeEvent("lobbyJoin", d));
+                        socket.on("lobbyUpdatePlayer", (d) => handleIncomingRealtimeEvent("lobbyUpdatePlayer", d));
+                        socket.on("lobbySync", (d) => handleIncomingRealtimeEvent("lobbySync", d));
+                        socket.on("lobbyChat", (d) => handleIncomingRealtimeEvent("lobbyChat", d));
+                        socket.on("lobbyKick", (d) => handleIncomingRealtimeEvent("lobbyKick", d));
+                        socket.on("lobbyLeave", (d) => handleIncomingRealtimeEvent("lobbyLeave", d));
+                        socket.on("lobbyStartGame", (d) => handleIncomingRealtimeEvent("lobbyStartGame", d));
                     });
                 } catch (e) {
                     return false;
@@ -659,7 +965,6 @@
                 if (socket && socket.connected) {
                     socket.emit(type, fullPayload);
                 }
-                // Transmissão WebRTC P2P (funciona direto no Vercel entre dispositivos diferentes)
                 const packet = { type, payload: fullPayload };
                 if (isRoomHost) {
                     p2pGuestConns.forEach((conn) => {
@@ -678,12 +983,13 @@
                 if (localChannel) {
                     localChannel.postMessage({ type: 'roomQuery', payload: { senderId: localPeerId } });
                 }
-                callback(cachedRooms);
+                mergeAndRenderRooms([]);
+                if (callback) callback(cachedRooms);
                 if (!socket) return;
                 socket.emit("getRooms");
                 socket.on("updateRooms", (rooms) => {
-                    cachedRooms = rooms || [];
-                    callback(cachedRooms);
+                    mergeAndRenderRooms(rooms || []);
+                    if (callback) callback(cachedRooms);
                 });
             },
             createRoom: async (roomName, roomDiff, maxPlayers = 4) => {
@@ -710,10 +1016,19 @@
 
                         peer.on('connection', (conn) => {
                             p2pGuestConns.set(conn.peer, conn);
+                            conn.on('open', () => {
+                                if (lobbyState) {
+                                    try {
+                                        conn.send({
+                                            type: 'lobbySync',
+                                            payload: { roomCode: currentRoomCode, senderId: localPeerId, lobby: lobbyState }
+                                        });
+                                    } catch (e) {}
+                                }
+                            });
                             conn.on('data', (msg) => {
                                 if (!msg || !msg.type) return;
                                 handleIncomingRealtimeEvent(msg.type, msg.payload);
-                                // Repassa movimento/ações de um convidado para os outros jogadores da sala
                                 p2pGuestConns.forEach((otherConn, peerKey) => {
                                     if (peerKey !== conn.peer && otherConn && otherConn.open) {
                                         try { otherConn.send(msg); } catch (e) {}
@@ -747,7 +1062,7 @@
 
                 const roomData = {
                     code: code,
-                    roomName: roomName || 'Sala sem nome',
+                    roomName: roomName || `Sala #${code}`,
                     hostName: getLocalPlayerName(),
                     hasPassword: false,
                     difficulty: roomDiff || 'normal',
@@ -757,7 +1072,8 @@
                     wave: 1
                 };
 
-                cachedRooms.push(roomData);
+                upsertStoredRoom(roomData);
+                mergeAndRenderRooms([roomData]);
                 if (localChannel) {
                     localChannel.postMessage({ type: 'roomAnnounce', payload: { room: roomData } });
                 }
@@ -765,9 +1081,9 @@
                 if (socket && socket.connected) {
                     socket.emit("createRoom", roomData);
                 }
-                return code;
+                return roomData;
             },
-            joinByCode: async (code) => {
+            joinByCode: async (code, roomMeta = null) => {
                 const cleanCode = (code || '').trim().toUpperCase();
                 if (cleanCode.length !== 6) return { ok: false, msg: 'O código deve ter 6 caracteres!' };
                 cleanupP2PNetwork();
@@ -780,10 +1096,10 @@
                 }
 
                 if (typeof Peer === 'undefined') {
-                    return { ok: true, code: cleanCode };
+                    return { ok: true, code: cleanCode, roomMeta };
                 }
 
-                showLobbyFeedback(`Conectando à sala #${cleanCode} no Vercel...`, false);
+                showLobbyFeedback(`Conectando ao lobby #${cleanCode}...`, false);
 
                 return new Promise((resolve) => {
                     try {
@@ -798,8 +1114,8 @@
                         };
 
                         const timeout = setTimeout(() => {
-                            finish({ ok: true, code: cleanCode });
-                        }, 5500);
+                            finish({ ok: true, code: cleanCode, roomMeta });
+                        }, 5000);
 
                         peer.on('open', () => {
                             const conn = peer.connect('RUSH-P5-ROOM-' + cleanCode, { reliable: true });
@@ -807,7 +1123,7 @@
 
                             conn.on('open', () => {
                                 clearTimeout(timeout);
-                                finish({ ok: true, code: cleanCode });
+                                finish({ ok: true, code: cleanCode, roomMeta });
                             });
 
                             conn.on('data', (msg) => {
@@ -824,16 +1140,22 @@
                         peer.on('error', (err) => {
                             clearTimeout(timeout);
                             if (err && err.type === 'peer-unavailable') {
+                                // Se existir localmente em outra aba via BroadcastChannel, ainda permite entrar
+                                const localMatch = getStoredRooms().find(r => r.code === cleanCode);
+                                if (localMatch) {
+                                    finish({ ok: true, code: cleanCode, roomMeta: localMatch });
+                                    return;
+                                }
                                 cleanupP2PNetwork();
                                 isMultiplayer = false;
                                 currentRoomCode = null;
                                 finish({ ok: false, msg: `Sala #${cleanCode} não encontrada! Verifique se o Host já criou a sala.` });
                             } else {
-                                finish({ ok: true, code: cleanCode });
+                                finish({ ok: true, code: cleanCode, roomMeta });
                             }
                         });
                     } catch (e) {
-                        resolve({ ok: true, code: cleanCode });
+                        resolve({ ok: true, code: cleanCode, roomMeta });
                     }
                 });
             }
@@ -842,7 +1164,7 @@
         async function reconnectMultiplayerServer() {
             const url = document.getElementById('mpServerUrlInput')?.value.trim();
             await window.CloudSync.init(url);
-            window.CloudSync.listenRooms((rooms) => renderMultiplayerRooms(rooms));
+            window.CloudSync.listenRooms((rooms) => mergeAndRenderRooms(rooms));
         }
     </script>
 
@@ -969,7 +1291,7 @@
         // NAVEGAÇÃO DE MENUS COM TRANSIÇÃO PERSONA 5
         function switchMenuStage(stage) {
             menuStage = stage;
-            ['menuModeSelect', 'menuSaveSelect', 'menuClassSelect', 'menuStatsSelect', 'menuMultiplayerLobby'].forEach(id => {
+            ['menuModeSelect', 'menuSaveSelect', 'menuClassSelect', 'menuStatsSelect', 'menuMultiplayerLobby', 'menuRoomLobbyWait'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
                     el.classList.add('hidden');
@@ -1004,15 +1326,24 @@
                 el.classList.add('flex', 'p5-modal-in');
             } else if (stage === 'stats') {
                 backBtn.classList.remove('hidden');
-                sub.innerText = 'CUSTOMIZAÇÃO DE ATRIBUTOS';
+                sub.innerText = isMultiplayer ? 'ATRIBUTOS DO PERSONAGEM NO LOBBY' : 'CUSTOMIZAÇÃO DE ATRIBUTOS';
+                const confirmBtn = document.getElementById('btnConfirmMenuStats');
+                if (confirmBtn) confirmBtn.innerText = isMultiplayer ? 'SALVAR NO LOBBY' : 'INICIAR HORDA';
                 const el = document.getElementById('menuStatsSelect');
                 el.classList.remove('hidden');
                 void el.offsetWidth;
                 el.classList.add('flex', 'p5-modal-in');
             } else if (stage === 'mp_lobby') {
                 backBtn.classList.remove('hidden');
-                sub.innerText = 'MULTIPLAYER ONLINE (SOCKET.IO)';
+                sub.innerText = 'NAVEGADOR DE SERVIDORES MULTIPLAYER';
                 const el = document.getElementById('menuMultiplayerLobby');
+                el.classList.remove('hidden');
+                void el.offsetWidth;
+                el.classList.add('flex', 'p5-modal-in');
+            } else if (stage === 'mp_lobby_wait') {
+                backBtn.classList.add('hidden');
+                sub.innerText = `SALA MULTIPLAYER • #${currentRoomCode || '------'}`;
+                const el = document.getElementById('menuRoomLobbyWait');
                 el.classList.remove('hidden');
                 void el.offsetWidth;
                 el.classList.add('flex', 'p5-modal-in');
@@ -1022,8 +1353,21 @@
         function handleMenuBack() {
             SoundFX.play('C4');
             if (menuStage === 'saves' || menuStage === 'mp_lobby') switchMenuStage('mode');
-            else if (menuStage === 'class') switchMenuStage(isMultiplayer ? 'mp_lobby' : 'saves');
-            else if (menuStage === 'stats') switchMenuStage(tempCharacterData && tempCharacterData.isLoadedSave ? 'saves' : 'class');
+            else if (menuStage === 'class') switchMenuStage(isMultiplayer ? 'mp_lobby_wait' : 'saves');
+            else if (menuStage === 'stats') {
+                if (isMultiplayer) switchMenuStage('mp_lobby_wait');
+                else switchMenuStage(tempCharacterData && tempCharacterData.isLoadedSave ? 'saves' : 'class');
+            }
+        }
+
+        function updateSlotDisplayWithCode() {
+            const el = document.getElementById('currentSlotDisplay');
+            if (!el) return;
+            if (isMultiplayer && currentRoomCode) {
+                el.innerText = `SALA #${currentRoomCode}`;
+            } else {
+                el.innerText = `${(activeSlotIndex !== null ? activeSlotIndex : 0) + 1}`;
+            }
         }
 
         function goToSaveSelect() {
@@ -1032,6 +1376,7 @@
             isMultiplayer = false;
             isRoomHost = true;
             currentRoomCode = null;
+            lobbyState = null;
             switchMenuStage('saves');
         }
 
@@ -1045,26 +1390,46 @@
             });
         }
 
+        function refreshServerBrowser() {
+            SoundFX.play('G4');
+            if (localChannel) {
+                localChannel.postMessage({ type: 'roomQuery', payload: { senderId: localPeerId } });
+            }
+            mergeAndRenderRooms([]);
+            showLobbyFeedback('Lista de servidores atualizada!', false);
+        }
+
         function renderMultiplayerRooms(rooms) {
             const container = document.getElementById('roomListContainer');
             if (!container) return;
             container.innerHTML = '';
             if (!rooms || rooms.length === 0) {
-                container.innerHTML = `<p class="text-gray-400 text-sm col-span-2 text-center py-8">Nenhuma sala pública ativa. Digite um código acima ou clique em "+ CRIAR SALA"!</p>`;
+                container.innerHTML = `<p class="text-gray-400 text-sm col-span-2 text-center py-8">Nenhum servidor ativo encontrado. Digite um código acima ou clique em "+ CRIAR SALA"!</p>`;
                 return;
             }
+            const diffLabels = { easy: 'FÁCIL', normal: 'NORMAL', hard: 'DIFÍCIL' };
             rooms.forEach(room => {
                 const codeTag = room.code ? `<span class="bg-blue-950 text-blue-300 border border-blue-400 px-2 py-0.5 text-[10px] font-mono ml-2">#${room.code}</span>` : '';
+                const isFull = (room.playersCount || 1) >= (room.maxPlayers || 4);
+                const statusBadge = room.status === 'playing'
+                    ? `<span class="text-[10px] bg-red-950 text-red-300 border border-red-500 px-2 py-0.5 uppercase">EM COMBATE</span>`
+                    : `<span class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-500 px-2 py-0.5 uppercase">NO LOBBY</span>`;
                 const div = document.createElement('div');
-                div.className = 'bg-neutral-900 border-2 border-blue-500 p-4 flex justify-between items-center shadow-[4px_4px_0px_#000]';
+                div.className = 'bg-neutral-900 border-2 border-blue-500 hover:border-yellow-400 transition-colors p-4 flex justify-between items-center shadow-[4px_4px_0px_#000]';
                 div.innerHTML = `
                     <div>
-                        <h3 class="text-white font-bold text-base uppercase flex items-center">${room.roomName}${codeTag}</h3>
-                        <p class="text-xs text-gray-400 mt-1">Host: ${room.hostName || 'Anônimo'} | Dif: <span class="text-yellow-400 uppercase">${room.difficulty}</span></p>
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            ${statusBadge}
+                            ${codeTag}
+                        </div>
+                        <h3 class="text-white font-bold text-base uppercase">${room.roomName}</h3>
+                        <p class="text-xs text-gray-400 mt-1">Anfitrião: <span class="text-white">${room.hostName || 'Anônimo'}</span> | Dif: <span class="text-yellow-400 uppercase">${diffLabels[room.difficulty] || 'NORMAL'}</span></p>
                     </div>
-                    <div class="text-right">
-                        <span class="block text-xs font-bold text-emerald-400 mb-1">${room.playersCount || 1}/${room.maxPlayers || 4} JOGADORES</span>
-                        <button onclick="joinMultiplayerRoom('${room.id || ''}', '${room.code || ''}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1 border border-white text-xs uppercase">ENTRAR</button>
+                    <div class="text-right shrink-0 ml-2">
+                        <span class="block text-xs font-bold ${isFull ? 'text-red-400' : 'text-emerald-400'} mb-2">${room.playersCount || 1}/${room.maxPlayers || 4} JOGADORES</span>
+                        <button onclick="joinMultiplayerRoom('${room.id || ''}', '${room.code || ''}')" ${isFull ? 'disabled' : ''} class="${isFull ? 'bg-zinc-700 text-gray-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer'} font-bold px-3.5 py-1.5 border border-white text-xs uppercase shadow-[2px_2px_0px_#000]">
+                            ${isFull ? 'LOTADA' : 'ENTRAR NO LOBBY'}
+                        </button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -1091,7 +1456,9 @@
             document.execCommand('copy');
             document.body.removeChild(temp);
             SoundFX.play('C6');
-            if (typeof game !== 'undefined' && game && game.player) {
+            if (menuStage === 'mp_lobby_wait') {
+                appendLobbyChatMessage('SISTEMA', `Link/Código #${currentRoomCode} copiado para a área de transferência!`, true);
+            } else if (typeof game !== 'undefined' && game && game.player) {
                 game.floatingTexts.push(new FloatingText(game.player.x, game.player.y - 36, 'LINK DA SALA COPIADO!', '#38bdf8', 16));
             }
         }
@@ -1100,47 +1467,358 @@
             showUI('createRoomModal');
         }
 
+        function buildLobbySummaryRoom() {
+            if (!lobbyState) return null;
+            return {
+                code: lobbyState.code,
+                roomName: lobbyState.roomName,
+                hostName: lobbyState.hostName,
+                hasPassword: false,
+                difficulty: lobbyState.difficulty,
+                maxPlayers: lobbyState.maxPlayers,
+                status: lobbyState.status || 'waiting',
+                playersCount: lobbyState.players.length,
+                wave: 1
+            };
+        }
+
+        function broadcastLobbySync() {
+            if (!isMultiplayer || !isRoomHost || !lobbyState) return;
+            const summary = buildLobbySummaryRoom();
+            if (summary) {
+                upsertStoredRoom(summary);
+                if (localChannel) {
+                    localChannel.postMessage({ type: 'roomAnnounce', payload: { room: summary } });
+                }
+            }
+            window.CloudSync.broadcast('lobbySync', { lobby: lobbyState });
+            renderWaitingLobby();
+        }
+
+        function createDefaultTempCharacter(cls = 'warrior') {
+            return {
+                class: cls,
+                wave: 1,
+                level: 1,
+                xp: 0,
+                xpToNext: 100,
+                gold: 50,
+                stats: { str: 1, spd: 1, dur: 1, sta: 1 },
+                baseStats: { str: 1, spd: 1, dur: 1, sta: 1 },
+                unspentPoints: 16,
+                inventory: [createItemInstance('potion_hp')],
+                equipped: {
+                    weapon: getStarterWeapon(cls),
+                    helmet: null,
+                    chest: null,
+                    boots: null
+                },
+                isLoadedSave: false
+            };
+        }
+
+        function enterWaitingLobby(roomMeta, asHost) {
+            isMultiplayer = true;
+            isRoomHost = asHost;
+            currentRoomCode = roomMeta.code;
+            activeSlotIndex = 0;
+
+            if (!tempCharacterData) {
+                tempCharacterData = createDefaultTempCharacter('warrior');
+            }
+
+            const localEntry = {
+                id: localPeerId,
+                name: getLocalPlayerName(),
+                class: tempCharacterData.class,
+                stats: { ...tempCharacterData.stats },
+                unspentPoints: tempCharacterData.unspentPoints,
+                ready: false,
+                isHost: asHost
+            };
+
+            lobbyState = {
+                code: roomMeta.code,
+                roomName: roomMeta.roomName || `Sala #${roomMeta.code}`,
+                hostName: roomMeta.hostName || getLocalPlayerName(),
+                difficulty: roomMeta.difficulty || 'normal',
+                maxPlayers: parseInt(roomMeta.maxPlayers || '4', 10),
+                status: 'waiting',
+                players: [localEntry]
+            };
+
+            const chatBox = document.getElementById('lobbyChatMessages');
+            if (chatBox) {
+                chatBox.innerHTML = `<p class="text-emerald-400 font-bold">[SISTEMA] Conectado à sala #${roomMeta.code} (${lobbyState.roomName}).</p>`;
+            }
+
+            switchMenuStage('mp_lobby_wait');
+            renderWaitingLobby();
+
+            if (asHost) {
+                if (lobbyAnnounceInterval) clearInterval(lobbyAnnounceInterval);
+                lobbyAnnounceInterval = setInterval(() => {
+                    if (isMultiplayer && isRoomHost && lobbyState && menuStage === 'mp_lobby_wait') {
+                        const summary = buildLobbySummaryRoom();
+                        upsertStoredRoom(summary);
+                        if (localChannel) {
+                            localChannel.postMessage({ type: 'roomAnnounce', payload: { room: summary } });
+                        }
+                    }
+                }, 4000);
+            } else {
+                // Convidado anuncia sua chegada ao Host
+                setTimeout(() => {
+                    window.CloudSync.broadcast('lobbyJoin', localEntry);
+                }, 250);
+            }
+        }
+
+        function renderWaitingLobby() {
+            if (!lobbyState) return;
+            const diffLabels = { easy: 'FÁCIL', normal: 'NORMAL', hard: 'DIFÍCIL' };
+            document.getElementById('lobbyRoomTitle').innerText = lobbyState.roomName;
+            document.getElementById('lobbyRoomCodeBadge').innerText = `#${lobbyState.code}`;
+            document.getElementById('lobbyRoomDiffBadge').innerText = `DIFICULDADE: ${diffLabels[lobbyState.difficulty] || 'NORMAL'}`;
+            document.getElementById('lobbyPlayersCountBadge').innerText = `${lobbyState.players.length} / ${lobbyState.maxPlayers} JOGADORES`;
+
+            if (tempCharacterData) {
+                document.getElementById('lobbyLocalPointsBadge').innerText = tempCharacterData.unspentPoints;
+            }
+
+            const grid = document.getElementById('lobbyPlayersGrid');
+            grid.innerHTML = '';
+
+            for (let i = 0; i < lobbyState.maxPlayers; i++) {
+                const pl = lobbyState.players[i];
+                const slotCard = document.createElement('div');
+                if (!pl) {
+                    slotCard.className = 'bg-zinc-950/80 border-2 border-dashed border-zinc-700 p-4 flex flex-col items-center justify-center min-h-[135px] text-center';
+                    slotCard.innerHTML = `
+                        <span class="text-xs font-bold text-gray-500 uppercase">SLOT ${i + 1} DISPONÍVEL</span>
+                        <span class="text-[11px] text-gray-600 mt-1">Aguardando jogador entrar...</span>
+                    `;
+                } else {
+                    const isMe = pl.id === localPeerId;
+                    const borderClass = pl.ready ? 'border-emerald-500' : (isMe ? 'border-yellow-400' : 'border-blue-500');
+                    slotCard.className = `bg-zinc-900 border-2 ${borderClass} p-3 flex flex-col justify-between min-h-[135px] shadow-[4px_4px_0px_#000]`;
+
+                    const classControls = isMe ? `
+                        <select onchange="selectLobbyClass(this.value)" class="bg-black border border-blue-400 text-white text-xs font-bold px-2 py-1 uppercase mt-1 w-full">
+                            <option value="warrior" ${pl.class === 'warrior' ? 'selected' : ''}>CLASSE: GUERREIRO</option>
+                            <option value="mage" ${pl.class === 'mage' ? 'selected' : ''}>CLASSE: ARCANISTA</option>
+                            <option value="archer" ${pl.class === 'archer' ? 'selected' : ''}>CLASSE: SENTINELA</option>
+                        </select>
+                    ` : `
+                        <div class="text-xs font-bold text-blue-300 uppercase mt-1">CLASSE: ${getClassNamePT(pl.class)}</div>
+                    `;
+
+                    const kickBtn = (isRoomHost && !isMe) ? `
+                        <button onclick="kickLobbyPlayer('${pl.id}')" class="bg-red-800 hover:bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 border border-white uppercase cursor-pointer">EXPULSAR</button>
+                    ` : '';
+
+                    slotCard.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-center gap-1">
+                                <span class="text-white font-bold text-sm uppercase truncate">${pl.name} ${pl.isHost ? '<span class="text-yellow-400 text-[10px]">[HOST]</span>' : ''} ${isMe ? '<span class="text-cyan-400 text-[10px]">[VOCÊ]</span>' : ''}</span>
+                                ${kickBtn}
+                            </div>
+                            ${classControls}
+                            <div class="text-[10px] text-gray-400 mt-1.5">
+                                FOR ${pl.stats?.str || 1} | VEL ${pl.stats?.spd || 1} | DUR ${pl.stats?.dur || 1} | ENE ${pl.stats?.sta || 1}
+                            </div>
+                        </div>
+                        <div class="mt-2 pt-1.5 border-t border-zinc-800 flex justify-between items-center">
+                            <span class="text-[10px] font-bold uppercase ${pl.ready ? 'text-emerald-400' : 'text-amber-400'}">
+                                ${pl.ready ? 'PRONTO PARA COMBATE' : 'PREPARANDO...'}
+                            </span>
+                        </div>
+                    `;
+                }
+                grid.appendChild(slotCard);
+            }
+
+            const me = lobbyState.players.find(p => p.id === localPeerId);
+            const readyBtn = document.getElementById('btnLobbyReady');
+            if (readyBtn && me) {
+                if (me.ready) {
+                    readyBtn.innerText = 'CANCELAR PRONTO';
+                    readyBtn.className = 'bg-amber-600 hover:bg-amber-500 text-white font-p5 text-sm sm:text-base px-5 py-2.5 border-2 border-white shadow-[4px_4px_0px_#000] uppercase cursor-pointer';
+                } else {
+                    readyBtn.innerText = 'ESTOU PRONTO!';
+                    readyBtn.className = 'bg-emerald-600 hover:bg-emerald-500 text-white font-p5 text-sm sm:text-base px-5 py-2.5 border-2 border-white shadow-[4px_4px_0px_#000] uppercase cursor-pointer';
+                }
+            }
+
+            const startBtn = document.getElementById('btnLobbyStart');
+            const hint = document.getElementById('lobbyFooterHint');
+            const allReady = lobbyState.players.length > 0 && lobbyState.players.every(p => p.ready);
+
+            if (isRoomHost) {
+                startBtn.classList.remove('hidden');
+                if (allReady) {
+                    startBtn.disabled = false;
+                    startBtn.className = 'bg-red-600 hover:bg-red-500 text-white font-p5 text-sm sm:text-base px-6 py-2.5 border-2 border-white shadow-[4px_4px_0px_#000] uppercase cursor-pointer animate-pulse';
+                    hint.innerText = 'Todos os jogadores estão prontos! Clique em INICIAR PARTIDA.';
+                } else {
+                    startBtn.disabled = true;
+                    startBtn.className = 'bg-zinc-700 text-gray-400 font-p5 text-sm sm:text-base px-6 py-2.5 border-2 border-zinc-500 uppercase cursor-not-allowed';
+                    hint.innerText = 'Aguardando todos os jogadores clicarem em "ESTOU PRONTO!" para iniciar.';
+                }
+            } else {
+                startBtn.classList.add('hidden');
+                hint.innerText = me && me.ready
+                    ? 'Você está pronto! Aguardando o Anfitrião iniciar a partida...'
+                    : 'Escolha sua classe, distribua seus pontos e clique em "ESTOU PRONTO!".';
+            }
+        }
+
+        function selectLobbyClass(newClass) {
+            SoundFX.play('G5');
+            if (!tempCharacterData) tempCharacterData = createDefaultTempCharacter(newClass);
+            tempCharacterData.class = newClass;
+            tempCharacterData.equipped.weapon = getStarterWeapon(newClass);
+
+            if (lobbyState) {
+                const me = lobbyState.players.find(p => p.id === localPeerId);
+                if (me) me.class = newClass;
+                if (isRoomHost) broadcastLobbySync();
+                else {
+                    window.CloudSync.broadcast('lobbyUpdatePlayer', { class: newClass });
+                    renderWaitingLobby();
+                }
+            }
+        }
+
+        function openLobbyStatsEditor() {
+            SoundFX.play('E5');
+            if (!tempCharacterData) tempCharacterData = createDefaultTempCharacter('warrior');
+            updateMenuStatsUI();
+            switchMenuStage('stats');
+        }
+
+        function toggleLobbyReady() {
+            if (!lobbyState) return;
+            const me = lobbyState.players.find(p => p.id === localPeerId);
+            if (!me) return;
+            me.ready = !me.ready;
+            SoundFX.play(me.ready ? 'C6' : 'C4');
+            if (isRoomHost) {
+                broadcastLobbySync();
+            } else {
+                window.CloudSync.broadcast('lobbyUpdatePlayer', { ready: me.ready });
+                renderWaitingLobby();
+            }
+        }
+
+        function sendLobbyChat(ev) {
+            ev.preventDefault();
+            const input = document.getElementById('lobbyChatInput');
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+            const author = getLocalPlayerName();
+            appendLobbyChatMessage(author, text, false);
+            window.CloudSync.broadcast('lobbyChat', { author, text });
+        }
+
+        function appendLobbyChatMessage(author, text, isSystem = false) {
+            const box = document.getElementById('lobbyChatMessages');
+            if (!box) return;
+            const p = document.createElement('p');
+            if (isSystem) {
+                p.className = 'text-emerald-400 font-bold';
+                p.innerText = `[${author}] ${text}`;
+            } else {
+                p.className = 'text-gray-200';
+                p.innerHTML = `<span class="text-yellow-400 font-bold">${author}:</span> ${text}`;
+            }
+            box.appendChild(p);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function kickLobbyPlayer(targetId) {
+            if (!isRoomHost || !lobbyState) return;
+            const target = lobbyState.players.find(p => p.id === targetId);
+            lobbyState.players = lobbyState.players.filter(p => p.id !== targetId);
+            window.CloudSync.broadcast('lobbyKick', { targetId });
+            if (target) appendLobbyChatMessage('SISTEMA', `${target.name} foi removido da sala.`, true);
+            broadcastLobbySync();
+        }
+
+        function leaveWaitingLobby() {
+            SoundFX.play('C4');
+            if (isRoomHost && currentRoomCode) {
+                window.CloudSync.broadcast('roomClosed', { code: currentRoomCode });
+                removeStoredRoom(currentRoomCode);
+            } else if (currentRoomCode) {
+                window.CloudSync.broadcast('lobbyLeave', {});
+            }
+            cleanupP2PNetwork();
+            isMultiplayer = false;
+            isRoomHost = false;
+            currentRoomCode = null;
+            lobbyState = null;
+            goToMultiplayerLobby();
+        }
+
+        function hostStartLobbyMatch() {
+            if (!isRoomHost || !lobbyState) return;
+            if (!lobbyState.players.every(p => p.ready)) return;
+            lobbyState.status = 'playing';
+            const summary = buildLobbySummaryRoom();
+            if (summary) upsertStoredRoom(summary);
+            window.CloudSync.broadcast('lobbyStartGame', { difficulty: lobbyState.difficulty });
+            startLocalPlayerFromLobby(lobbyState.difficulty);
+        }
+
+        function startLocalPlayerFromLobby(difficulty = 'normal') {
+            if (!tempCharacterData) tempCharacterData = createDefaultTempCharacter('warrior');
+            if (tempCharacterData.unspentPoints > 0) {
+                randomizeMenuStats();
+            }
+            tempCharacterData.difficulty = difficulty;
+            launchGameWithData(JSON.parse(JSON.stringify(tempCharacterData)));
+        }
+
         async function submitCreateRoom() {
             const name = document.getElementById('mpRoomName').value.trim();
             const diff = document.getElementById('mpRoomDiff').value;
             const max = document.getElementById('mpRoomMax').value;
             hideUI('createRoomModal');
-            const generatedCode = await window.CloudSync.createRoom(name, diff, max);
-            currentRoomCode = generatedCode;
-            isMultiplayer = true;
-            isRoomHost = true;
-            activeSlotIndex = 0;
-            updateSlotDisplayWithCode();
-            switchMenuStage('class');
+            tempCharacterData = createDefaultTempCharacter('warrior');
+            const roomData = await window.CloudSync.createRoom(name, diff, max);
+            enterWaitingLobby(roomData, true);
         }
 
         async function joinByRoomCode() {
             const input = document.getElementById('joinRoomCodeInput');
             const code = input ? input.value : '';
-            const res = await window.CloudSync.joinByCode(code);
+            const cleanCode = code.trim().toUpperCase();
+            const knownRoom = cachedRooms.find(r => r.code === cleanCode) || getStoredRooms().find(r => r.code === cleanCode);
+            const res = await window.CloudSync.joinByCode(cleanCode, knownRoom);
             if (!res.ok) {
                 SoundFX.play('C3');
                 showLobbyFeedback(res.msg, true);
                 return;
             }
             SoundFX.play('G5');
-            isMultiplayer = true;
-            isRoomHost = false;
-            activeSlotIndex = 0;
-            updateSlotDisplayWithCode();
-            switchMenuStage('class');
+            tempCharacterData = createDefaultTempCharacter('warrior');
+            enterWaitingLobby(res.roomMeta || {
+                code: cleanCode,
+                roomName: `Sala #${cleanCode}`,
+                hostName: 'Anfitrião',
+                difficulty: 'normal',
+                maxPlayers: 4
+            }, false);
         }
 
         function joinMultiplayerRoom(roomId, code) {
-            if (code) currentRoomCode = code.toUpperCase();
-            isMultiplayer = true;
-            isRoomHost = false;
-            if (socket && socket.connected && currentRoomCode) {
-                socket.emit("joinRoomByCode", { code: currentRoomCode, playerName: getLocalPlayerName() });
-            }
-            activeSlotIndex = 0;
-            updateSlotDisplayWithCode();
-            switchMenuStage('class');
+            const cleanCode = (code || '').trim().toUpperCase();
+            const input = document.getElementById('joinRoomCodeInput');
+            if (input) input.value = cleanCode;
+            joinByRoomCode();
         }
 
         // GERENCIAMENTO DE 4 SLOTS DE SAVE
@@ -1311,6 +1989,25 @@
 
         function confirmMenuStatsAndLaunch() {
             if (!tempCharacterData) return;
+            if (isMultiplayer && lobbyState) {
+                SoundFX.play('G5');
+                const me = lobbyState.players.find(p => p.id === localPeerId);
+                if (me) {
+                    me.stats = { ...tempCharacterData.stats };
+                    me.unspentPoints = tempCharacterData.unspentPoints;
+                }
+                if (isRoomHost) {
+                    broadcastLobbySync();
+                } else {
+                    window.CloudSync.broadcast('lobbyUpdatePlayer', {
+                        stats: { ...tempCharacterData.stats },
+                        unspentPoints: tempCharacterData.unspentPoints
+                    });
+                }
+                switchMenuStage('mp_lobby_wait');
+                renderWaitingLobby();
+                return;
+            }
             if (tempCharacterData.unspentPoints > 0) {
                 document.getElementById('unspentPointsModalCount').innerText = tempCharacterData.unspentPoints;
                 showUI('autoBalanceConfirmModal');
@@ -1798,11 +2495,11 @@
         }
 
         class Enemy {
-            constructor(id, x, y, type, wave) {
+            constructor(id, x, y, type, wave, diffMult = 1.0) {
                 this.id = id;
                 this.x = x; this.y = y;
                 this.type = type; // 'walker' | 'tank' | 'spitter' | 'boss'
-                const scale = 1 + (wave - 1) * 0.22;
+                const scale = (1 + (wave - 1) * 0.22) * diffMult;
                 if (type === 'boss') {
                     this.radius = 34; this.maxHp = Math.round(520 * scale); this.speed = 115;
                     this.damage = Math.round(28 * scale); this.color = '#dc2626'; this.xpReward = 140; this.goldReward = 90;
@@ -2114,6 +2811,7 @@
 
             startNewSession(charData) {
                 this.player = new Player(charData);
+                this.difficulty = charData.difficulty || 'normal';
                 this.wave = charData.wave || 1;
                 this.enemies = [];
                 this.projectiles = [];
@@ -2161,7 +2859,9 @@
 
             spawnEnemiesForWave(waveNum) {
                 this.enemies = [];
-                const total = 5 + waveNum * 3;
+                const diffMult = this.difficulty === 'hard' ? 1.35 : (this.difficulty === 'easy' ? 0.75 : 1.0);
+                const playerScale = isMultiplayer ? (1 + this.remotePlayers.size * 0.4) : 1.0;
+                const total = Math.round((5 + waveNum * 3) * playerScale);
                 for (let i = 0; i < total; i++) {
                     const angle = (Math.PI * 2 * i) / total + Math.random() * 0.4;
                     const dist = 480 + Math.random() * 380;
@@ -2170,10 +2870,10 @@
                     let type = 'walker';
                     if (waveNum >= 2 && i % 4 === 0) type = 'spitter';
                     if (waveNum >= 3 && i % 5 === 0) type = 'tank';
-                    this.enemies.push(new Enemy(this.enemyIdCounter++, x, y, type, waveNum));
+                    this.enemies.push(new Enemy(this.enemyIdCounter++, x, y, type, waveNum, diffMult));
                 }
                 if (waveNum % 5 === 0) {
-                    this.enemies.push(new Enemy(this.enemyIdCounter++, 0, -560, 'boss', waveNum));
+                    this.enemies.push(new Enemy(this.enemyIdCounter++, 0, -560, 'boss', waveNum, diffMult));
                 }
             }
 
