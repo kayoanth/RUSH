@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RUSH! - Persona 5 RPG: Labyrinth Wave Survival</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Redaction+50:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- Tone.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        * {
+            user-select: none; -webkit-user-select: none; touch-action: manipulation; image-rendering: pixelated;
+        }
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+            background-color: #050505; font-family: 'Redaction 50', serif;
+        }
+        .font-p5, .font-p5alt, .font-sans, h1, h2, h3, h4, span, p, button, div, input, select {
+            font-family: 'Redaction 50', serif !important; letter-spacing: 1px;
+        }
+
+        .p5-bg {
+            background-color: #e60012;
+            background-image: radial-gradient(#000 2px, transparent 2px), radial-gradient(#000 2px, transparent 2px);
+            background-size: 24px 24px; background-position: 0 0, 12px 12px; position: relative;
+        }
+        .p5-bg::before {
+            content: ""; position: absolute; inset: 0;
+            background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.9) 120%); pointer-events: none;
+        }
+
+        .p5-card { transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: -10px 10px 0px rgba(0,0,0,1); position: relative; }
+        .p5-card::after { content: ""; position: absolute; inset: 0; border: 4px dashed rgba(255,255,255,0.2); pointer-events: none; }
+        .p5-card:hover { transform: scale(1.03) translateY(-4px) skewX(-1deg); box-shadow: -16px 16px 0px rgba(255,255,255,1); }
+        .pixel-shadow { box-shadow: 4px 4px 0px #000; }
+
+        #damage-flash, #parry-flash { transition: opacity 0.15s ease-out; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #e60012; border-radius: 3px; }
+
+        @keyframes p5ModalIn { 
+            0% { transform: translateX(100vw) skewX(-15deg); opacity: 0; } 
+            100% { transform: translateX(0) skewX(0deg); opacity: 1; } 
+        }
+        @keyframes p5ModalOut { 
+            0% { transform: translateX(0) skewX(0deg); opacity: 1; } 
+            100% { transform: translateX(-100vw) skewX(15deg); opacity: 0; } 
+        }
+        .p5-modal-in { animation: p5ModalIn 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .p5-modal-out { animation: p5ModalOut 0.28s ease-in forwards; }
+
+        @keyframes p5WaveBanner {
+            0% { transform: scale(0.2) rotate(-8deg); opacity: 0; }
+            60% { transform: scale(1.08) rotate(2deg); opacity: 1; }
+            100% { transform: scale(1.0) rotate(0deg); opacity: 1; }
+        }
+        .animate-p5-wave { animation: p5WaveBanner 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        .pixel-bar-container {
+            position: relative; background: #000000; border: 4px solid #ffffff; box-shadow: 4px 4px 0px #000000; image-rendering: pixelated;
+        }
+
+        .pixel-bar-hp { height: 32px; width: 320px; }
+        .pixel-fill-hp {
+            background: #dc2626; height: 100%; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.4), inset 0 4px 0 rgba(255,255,255,0.4);
+            background-image: repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(0, 0, 0, 0.5) 18px, rgba(0, 0, 0, 0.5) 22px);
+        }
+
+        .pixel-bar-sta { height: 24px; width: 260px; }
+        .pixel-fill-sta {
+            background: #06b6d4; height: 100%; box-shadow: inset 0 -3px 0 rgba(0,0,0,0.4), inset 0 3px 0 rgba(255,255,255,0.4);
+            background-image: repeating-linear-gradient(90deg, transparent, transparent 14px, rgba(0, 0, 0, 0.5) 14px, rgba(0, 0, 0, 0.5) 18px);
+        }
+
+        .pixel-bar-spec { height: 20px; width: 220px; }
+        .pixel-fill-spec {
+            background: #a855f7; height: 100%; box-shadow: inset 0 -3px 0 rgba(0,0,0,0.4), inset 0 3px 0 rgba(255,255,255,0.4);
+        }
+
+        .pixel-bar-text {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: #ffffff; text-shadow: 2px 2px 0px #000000; letter-spacing: 1px;
+        }
+
+        .inv-panel-new { background-color: #2e3440; border: 4px solid #4c566a; box-shadow: 8px 8px 0px rgba(0,0,0,1); }
+        .inv-slot-new { background-color: #1f242e; border: 2px solid #3b4252; cursor: pointer; transition: all 0.1s ease; }
+        .inv-slot-new:hover { border-color: #fff; transform: scale(1.05); z-index: 10; }
+        .inv-slot-new.selected { border-color: #ebcb8b; background-color: #434c5e; transform: scale(1.05); z-index: 10; }
+    </style>
+</head>
+<body class="bg-black text-white select-none overflow-hidden">
+
+    <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block bg-neutral-950 z-0"></canvas>
+
+    <!-- HUD DO JOGO -->
+    <div id="gameHUD" class="absolute inset-0 z-20 pointer-events-none p-3 sm:p-5 flex flex-col justify-between opacity-0 invisible transition-opacity duration-300">
+        <div class="flex flex-wrap justify-between items-start gap-4 w-full">
+            <div class="flex flex-col space-y-2 max-w-full">
+                <div class="flex items-center gap-2">
+                    <div class="bg-yellow-400 text-black font-black px-3 py-1 border-4 border-black shadow-[4px_4px_0px_#000] text-sm sm:text-base">
+                        LVL <span id="hudPlayerLevel">1</span>
+                    </div>
+                    <div class="pixel-bar-container h-7 w-40 sm:w-52">
+                        <div id="xpBar" class="bg-emerald-500 h-full transition-all duration-200" style="width: 0%;"></div>
+                        <div id="xpText" class="pixel-bar-text text-[10px] sm:text-xs">0 / 100 XP</div>
+                    </div>
+                    <button id="btnStatUp" onclick="openStatsMenu()" class="hidden pointer-events-auto bg-emerald-500 hover:bg-emerald-400 text-black font-black px-2.5 py-1 border-2 border-white shadow-[3px_3px_0px_#000] text-xs animate-bounce uppercase">
+                        + STATUS
+                    </button>
+                </div>
+                <div class="pixel-bar-container pixel-bar-hp max-w-[85vw] sm:max-w-none">
+                    <div id="hpBar" class="pixel-fill-hp transition-all duration-150" style="width: 100%;"></div>
+                    <div id="hpText" class="pixel-bar-text text-xs sm:text-sm">100 / 100 HP</div>
+                </div>
+                <div class="pixel-bar-container pixel-bar-sta max-w-[75vw] sm:max-w-none">
+                    <div id="resourceBar" class="pixel-fill-sta transition-all duration-150" style="width: 100%;"></div>
+                    <div id="resourceText" class="pixel-bar-text text-[11px] sm:text-xs">STAMINA: 100</div>
+                </div>
+                <div class="pixel-bar-container pixel-bar-spec max-w-[65vw] sm:max-w-none">
+                    <div id="specialBar" class="pixel-fill-spec transition-all duration-150" style="width: 100%;"></div>
+                    <div id="specialText" class="pixel-bar-text text-[10px] sm:text-xs">ESPECIAL (E): PRONTO</div>
+                </div>
+                <div id="mageActiveShape" class="hidden bg-blue-950/90 border-2 border-blue-400 px-3 py-1 text-[10px] sm:text-xs text-blue-200 font-bold w-fit shadow-[3px_3px_0px_#000]">
+                    MAGIA [<span id="activeMageElem" class="text-yellow-400 uppercase">FOGO</span>]: <span id="activeSpellShape" class="text-white">TIRO RÁPIDO</span> (1-4 | M2 ELEMENTO)
+                </div>
+            </div>
+
+            <div class="flex flex-col items-end space-y-2 ml-auto shrink-0">
+                <div class="flex items-center gap-2">
+                    <div id="hudBiomeBadge" class="bg-black/90 text-emerald-400 border-2 border-emerald-500 px-3 py-1 text-[10px] sm:text-xs font-bold uppercase shadow-[3px_3px_0px_#000]">
+                        FLORESTA ANTIGA
+                    </div>
+                    <button onclick="togglePauseMenu()" class="pointer-events-auto bg-zinc-900 hover:bg-red-700 text-white font-black px-3 py-1 border-2 border-white shadow-[3px_3px_0px_#000] text-xs uppercase">
+                        II PAUSE
+                    </button>
+                </div>
+                <div class="bg-black/95 border-4 border-white px-4 py-2 text-right shadow-[6px_6px_0px_#e60012]">
+                    <div id="hudWaveTitle" class="text-xl sm:text-3xl font-p5 text-white uppercase tracking-wider" style="text-shadow: 2px 2px 0 #e60012;">HORDA 1</div>
+                    <div id="hudEnemiesLeft" class="text-xs sm:text-sm font-bold text-yellow-400 uppercase mt-0.5">INIMIGOS: 0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col items-center gap-3 pb-2 w-full">
+            <div id="waveBanner" class="hidden opacity-0 bg-black/95 border-4 border-yellow-400 px-5 py-2 text-center shadow-[6px_6px_0px_#000] pointer-events-auto">
+                <p class="text-yellow-400 font-p5 text-base sm:text-xl uppercase">INTERVALO DE PREPARAÇÃO</p>
+                <p class="text-white text-xs sm:text-sm font-bold mt-0.5">PRÓXIMA HORDA EM: <span id="waveTimer" class="text-red-500 text-sm sm:text-base">60</span>s</p>
+                <button onclick="game.skipWaveWait()" class="mt-1.5 bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-1 border-2 border-white text-xs uppercase shadow-[3px_3px_0px_#000]">
+                    INICIAR PRÓXIMA HORDA AGORA (F)
+                </button>
+            </div>
+
+            <div id="hudBottomButtons" class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 opacity-0 invisible transition-opacity duration-200">
+                <button onclick="openInventory()" class="pointer-events-auto group relative flex items-center gap-3 bg-gradient-to-b from-zinc-900 to-zinc-950 hover:from-amber-950/90 hover:to-zinc-950 border-2 border-amber-500 px-5 py-3 shadow-[4px_4px_0_0_#000] transition-all duration-150 hover:-translate-y-1 active:translate-y-0.5">
+                    <span class="font-bold tracking-widest text-xs sm:text-sm text-white group-hover:text-amber-300 uppercase">INVENTÁRIO</span>
+                    <kbd class="ml-1 px-2 py-0.5 text-xs font-mono font-bold bg-zinc-800 text-amber-400 border border-amber-500/60">I</kbd>
+                </button>
+
+                <button onclick="openStatsMenu()" class="pointer-events-auto group relative flex items-center gap-3 bg-gradient-to-b from-zinc-900 to-zinc-950 hover:from-emerald-950/90 hover:to-zinc-950 border-2 border-emerald-500 px-5 py-3 shadow-[4px_4px_0_0_#000] transition-all duration-150 hover:-translate-y-1 active:translate-y-0.5">
+                    <span class="font-bold tracking-widest text-xs sm:text-sm text-white group-hover:text-emerald-300 uppercase">STATUS</span>
+                    <kbd class="ml-1 px-2 py-0.5 text-xs font-mono font-bold bg-zinc-800 text-emerald-400 border border-emerald-500/60">C</kbd>
+                    <span id="statPointsBadge" class="hidden absolute -top-2.5 -right-2.5 bg-red-600 text-white text-[10px] font-black px-1.5 py-0.5 border border-white shadow-[2px_2px_0_0_#000] animate-bounce">+1</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BANNER DE INÍCIO DE WAVE ESTILO PERSONA 5 -->
+    <div id="waveStartModal" class="absolute inset-0 z-30 flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300">
+        <div id="waveStartBanner" class="bg-black border-4 border-white px-10 py-4 shadow-[12px_12px_0px_#e60012] animate-p5-wave">
+            <h1 id="waveStartTitle" class="text-5xl sm:text-7xl font-p5 text-white uppercase tracking-widest" style="text-shadow: 4px 4px 0 #e60012;">WAVE 1</h1>
+            <p class="text-yellow-400 text-center text-xs sm:text-sm font-bold tracking-widest mt-1">PREPARE-SE PARA O COMBATE!</p>
+        </div>
+    </div>
+
+    <div id="damage-flash" class="absolute inset-0 bg-red-600/30 opacity-0 z-10 pointer-events-none"></div>
+    <div id="parry-flash" class="absolute inset-0 bg-white opacity-0 z-20 pointer-events-none"></div>
+
+    <!-- MENU PRINCIPAL -->
+    <div id="mainMenu" class="absolute inset-0 z-30 p5-bg flex flex-col p-3 sm:p-6 transition-opacity duration-300 pointer-events-auto overflow-y-auto overflow-x-hidden min-h-screen">
+        <div class="relative z-10 flex flex-col items-start space-y-1 sm:space-y-2 mb-2 shrink-0">
+            <div class="bg-black text-white px-4 sm:px-8 py-2 border-2 sm:border-4 border-white shadow-[4px_4px_0px_#e60012] sm:shadow-[8px_8px_0px_#e60012] max-w-full">
+                <h1 class="text-4xl sm:text-5xl md:text-7xl font-p5 tracking-widest text-white uppercase break-words" style="text-shadow: 3px 3px 0 #e60012;">
+                    RUSH<span class="text-red-500">!</span>
+                </h1>
+            </div>
+            <div class="bg-white text-black px-3 py-1 font-p5alt text-[10px] sm:text-xs md:text-sm border-2 border-black shadow-[3px_3px_0px_#000] max-w-full whitespace-normal break-words" id="menuSubtitle">
+                SELECIONE O MODO DE JOGO
+            </div>
+        </div>
+
+        <!-- ETAPA 1: ESCOLHA DE MODO -->
+        <div id="menuModeSelect" class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 max-w-4xl w-full mx-auto mt-10 md:mt-20 mb-auto z-10 p5-modal-in shrink-0">
+            <div onclick="goToSaveSelect()" class="p5-card bg-black border-4 border-red-600 p-6 cursor-pointer flex flex-col justify-between group relative overflow-hidden transition-all duration-300 hover:bg-red-600 min-h-[220px]">
+                <div class="absolute -right-4 top-2 text-red-900/40 font-p5 text-7xl sm:text-8xl group-hover:text-black/30 z-0 transition-colors duration-300">SOLO</div>
+                <div class="flex flex-col items-start relative z-10 h-full justify-between w-full">
+                    <div class="w-full">
+                        <h2 class="text-3xl sm:text-4xl font-p5 text-white group-hover:text-black break-words transition-colors duration-300" style="text-shadow: 2px 2px 0 #e60012;">SINGLEPLAYER</h2>
+                        <span class="bg-white text-black font-p5alt px-3 py-1 text-xs sm:text-sm mt-3 uppercase border-2 border-black inline-block font-bold shadow-[2px_2px_0px_#000]">MODO HISTÓRIA & WAVE</span>
+                    </div>
+                    <div class="bg-black p-4 mt-6 border-l-4 border-red-500 group-hover:border-black group-hover:bg-red-950 w-full transition-colors duration-300">
+                        <p class="text-gray-300 text-xs sm:text-sm md:text-base group-hover:text-white leading-relaxed">Gerencie até 4 Slots de Save. Enfrente hordas solo com sua classe fixa.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div onclick="goToMultiplayerLobby()" class="p5-card bg-black border-4 border-blue-600 p-6 cursor-pointer flex flex-col justify-between group relative overflow-hidden transition-all duration-300 hover:bg-blue-600 min-h-[220px]">
+                <div class="absolute -right-4 top-2 text-blue-900/40 font-p5 text-7xl sm:text-8xl group-hover:text-black/30 z-0 transition-colors duration-300">COOP</div>
+                <div class="flex flex-col items-start relative z-10 h-full justify-between w-full">
+                    <div class="w-full">
+                        <h2 class="text-3xl sm:text-4xl font-p5 text-white group-hover:text-black break-words transition-colors duration-300" style="text-shadow: 2px 2px 0 #1d4ed8;">MULTIPLAYER</h2>
+                        <span id="mpBadgeStatus" class="bg-blue-500 text-white font-p5alt px-3 py-1 text-xs sm:text-sm mt-3 uppercase border-2 border-black inline-block font-bold shadow-[2px_2px_0px_#000]">LOBBY ONLINE (SOCKET.IO)</span>
+                    </div>
+                    <div class="bg-black p-4 mt-6 border-l-4 border-blue-500 group-hover:border-black group-hover:bg-blue-950 w-full transition-colors duration-300">
+                        <p class="text-gray-300 text-xs sm:text-sm md:text-base group-hover:text-white leading-relaxed">Crie ou entre em salas em tempo real via servidor Socket.io.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ETAPA 1.5: LOBBY MULTIPLAYER (SOCKET.IO) -->
+        <div id="menuMultiplayerLobby" class="hidden flex-col max-w-4xl w-full mx-auto mt-6 mb-auto z-10 p5-modal-in shrink-0 bg-black/95 border-4 border-blue-500 p-6 shadow-[10px_10px_0px_#000]">
+            <div class="flex flex-wrap justify-between items-center gap-4 border-b-2 border-blue-800 pb-4 mb-4">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-p5 text-white uppercase" style="text-shadow: 2px 2px 0 #1d4ed8;">SALAS MULTIPLAYER</h2>
+                    <p id="socketConnectionStatus" class="text-xs text-yellow-400 font-bold mt-1">Conectando ao servidor...</p>
+                </div>
+                <button onclick="openCreateRoomModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 border-2 border-white shadow-[4px_4px_0px_#000] uppercase text-xs sm:text-sm">
+                    + CRIAR SALA
+                </button>
+            </div>
+            <div id="roomListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[340px] overflow-y-auto pr-1">
+                <p class="text-gray-400 text-sm col-span-2 text-center py-8">Buscando salas ativas no servidor...</p>
+            </div>
+        </div>
+
+        <!-- ETAPA 2: SELEÇÃO DE SAVES (4 SLOTS) -->
+        <div id="menuSaveSelect" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-4xl w-full mx-auto mt-6 md:mt-10 mb-auto z-10 p5-modal-in shrink-0">
+        </div>
+
+        <!-- ETAPA 3: SELEÇÃO DE CLASSE -->
+        <div id="menuClassSelect" class="hidden flex-col items-center justify-center w-full z-10 p5-modal-in shrink-0 mt-4 md:mt-8 mb-auto">
+            <div class="w-full max-w-5xl mx-auto flex flex-col items-center justify-center px-4">
+                <h2 class="text-2xl sm:text-4xl font-black text-white mb-2 tracking-widest border-2 border-white bg-black px-6 py-2 inline-block shadow-[4px_4px_0px_#e60012] uppercase" style="text-shadow: 2px 2px 0 #e60012;">SELECIONE SUA CLASSE</h2>
+                <p class="text-gray-300 text-xs sm:text-sm uppercase tracking-widest bg-white text-black px-4 py-1 inline-block font-bold mb-6 border-2 border-black shadow-[3px_3px_0px_#000]">SLOT <span id="currentSlotDisplay">1</span>: ESCOLHA FIXA PARA ESTE SAVE</p>
+
+                <div class="w-full">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 justify-items-center">
+                        <button onclick="selectClassAndStart('warrior')" class="relative group bg-neutral-950 border-4 border-red-600 p-5 flex flex-col items-center justify-center min-h-[240px] w-full max-w-xs hover:bg-red-950 transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 overflow-hidden shadow-[8px_8px_0px_rgba(0,0,0,1)]">
+                            <span class="absolute text-7xl text-white/5 font-bold italic z-0 group-hover:text-red-500/10 uppercase font-p5">WAR</span>
+                            <div class="relative z-10 text-center flex flex-col items-center w-full">
+                                <h3 class="text-2xl sm:text-3xl font-black text-white mb-2 tracking-wider font-p5 uppercase" style="text-shadow: 3px 3px 0 #b91c1c;">GUERREIRO</h3>
+                                <span class="inline-block bg-white text-black font-p5alt text-xs font-bold px-2 py-1 mb-3 uppercase border-2 border-black">Vigor & Espada</span>
+                                <div class="bg-black/60 p-3 border-l-4 border-red-500 w-full text-left">
+                                    <p class="text-gray-300 text-xs leading-relaxed">Combate corpo a corpo brutal. Especial (E) lança a espada giratória teleguiada.</p>
+                                </div>
+                            </div>
+                        </button>
+
+                        <button onclick="selectClassAndStart('mage')" class="relative group bg-neutral-950 border-4 border-blue-600 p-5 flex flex-col items-center justify-center min-h-[240px] w-full max-w-xs hover:bg-blue-950 transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 overflow-hidden shadow-[8px_8px_0px_rgba(0,0,0,1)]">
+                            <span class="absolute text-7xl text-white/5 font-bold italic z-0 group-hover:text-blue-500/10 uppercase font-p5">MAG</span>
+                            <div class="relative z-10 text-center flex flex-col items-center w-full">
+                                <h3 class="text-2xl sm:text-3xl font-black text-white mb-2 tracking-wider font-p5 uppercase" style="text-shadow: 3px 3px 0 #1d4ed8;">ARCANISTA</h3>
+                                <span class="inline-block bg-white text-black font-p5alt text-xs font-bold px-2 py-1 mb-3 uppercase border-2 border-black">Magia Elemental</span>
+                                <div class="bg-black/60 p-3 border-l-4 border-blue-500 w-full text-left">
+                                    <p class="text-gray-300 text-xs leading-relaxed">M2 altera elemento (Fogo, Água, Terra, Ar). Teclas 1-4 mudam o formato do feitiço.</p>
+                                </div>
+                            </div>
+                        </button>
+
+                        <button onclick="selectClassAndStart('archer')" class="relative group bg-neutral-950 border-4 border-emerald-600 p-5 flex flex-col items-center justify-center min-h-[240px] w-full max-w-xs hover:bg-emerald-950 transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 overflow-hidden shadow-[8px_8px_0px_rgba(0,0,0,1)]">
+                            <span class="absolute text-7xl text-white/5 font-bold italic z-0 group-hover:text-emerald-500/10 uppercase font-p5">SNT</span>
+                            <div class="relative z-10 text-center flex flex-col items-center w-full">
+                                <h3 class="text-2xl sm:text-3xl font-black text-white mb-2 tracking-wider font-p5 uppercase" style="text-shadow: 3px 3px 0 #047857;">SENTINELA</h3>
+                                <span class="inline-block bg-white text-black font-p5alt text-xs font-bold px-2 py-1 mb-3 uppercase border-2 border-black">Precisão & Esquiva</span>
+                                <div class="bg-black/60 p-3 border-l-4 border-emerald-500 w-full text-left">
+                                    <p class="text-gray-300 text-xs leading-relaxed">Disparos rápidos à distância e flecha perfurante gigante no Especial (E).</p>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ETAPA 4: DISTRIBUIÇÃO DE STATUS PRÉ-COMBATE -->
+        <div id="menuStatsSelect" class="hidden flex-col items-center max-w-2xl w-full mx-auto mt-6 md:mt-10 mb-auto z-10 p5-modal-in shrink-0">
+            <div class="p5-card bg-black border-4 border-yellow-400 p-6 sm:p-8 w-full shadow-[8px_8px_0px_#000]">
+                <div class="flex flex-col items-center text-center w-full">
+                    <span class="bg-yellow-400 text-black font-bold px-3 py-1 text-[10px] sm:text-xs uppercase border border-black mb-2">PREPARAÇÃO DE PERSONAGEM</span>
+                    <h2 id="menuStatsClassTitle" class="text-2xl sm:text-4xl font-p5 text-white uppercase mb-2 break-words" style="text-shadow: 3px 3px 0 #e60012;">GUERREIRO</h2>
+                    <p class="text-yellow-400 font-bold text-xs sm:text-sm mb-6">PONTOS DISPONÍVEIS: <span id="menuStatPointsLeft" class="text-lg sm:text-xl text-white ml-2">16</span></p>
+
+                    <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 text-left">
+                        <div class="flex justify-between items-center bg-neutral-900 p-3 border-2 border-neutral-700">
+                            <div class="leading-tight">
+                                <span class="font-bold text-white text-xs sm:text-sm block">FORÇA (+15% DANO)</span>
+                                <span class="text-[10px] sm:text-xs text-gray-400">Nível: <span id="menuValStr">1</span> (Máx 5)</span>
+                            </div>
+                            <div class="flex gap-2 shrink-0">
+                                <button onclick="removeMenuStatPoint('str')" class="bg-red-700 hover:bg-red-500 text-white font-bold w-8 h-8 flex items-center justify-center border-2 border-white text-sm">-</button>
+                                <button onclick="addMenuStatPoint('str')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold w-8 h-8 flex items-center justify-center border-2 border-white text-sm">+</button>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center bg-neutral-900 p-3 border-2 border-neutral-700">
+                            <div class="leading-tight">
+                                <span class="font-bold text-white text-xs sm:text-sm block">VELOCIDADE (+20 VEL)</span>
+                                <span class="text-[10px] sm:text-xs text-gray-400">Nível: <span id="menuValSpd">1</span></span>
+                            </div>
+                            <div class="flex gap-2 shrink-0">
+                                <button onclick="removeMenuStatPoint('spd')" class="bg-red-700 hover:bg-red-500 text-white font-bold w-8 h-8 flex items-center justify-center border-2 border-white text-sm">-</button>
+                                <button onclick="addMenuStatPoint('spd')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold w-8 h-8 flex items-center justify-center border-2 border-white text-sm">+</button>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center bg-neutral-900 p-3 border-2 border-neutral-700">
+                            <div class="leading-tight">
+                                <span class="font-bold text-white text-xs sm:text-sm block">DURABILIDADE (+45 HP)</span>
+                                <span class="text-[10px] sm:text-xs text-gray-400">Nível: <span id="menuValDur">1</span> (Máx 5)</span>
+                            </div>
+                            <div class="flex gap-2 shrink-0">
+                                <button onclick="removeMenuStatPoint('dur')" class="bg-red-700 hover:bg-red-500 text-white font-bold w-8 h-8 flex items-center justify-center border-2 border-white text-sm">-</button>
+                                <button onclick="addMenuStatPoint('dur')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold w-8 h-8 flex items-center justify-center border-2 border-white text-sm">+</button>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center bg-neutral-900 p-3 border-2 border-neutral-700">
+                            <div class="leading-tight">
+                                <span class="font-bold text-white text-xs sm:text-sm block">ENERGIA (+15 REC.)</span>
+                                <span class="text-[10px] sm:text-xs text-gray-400">Nível: <span id="menuValSta">1</span></span>
+                            </div>
+                            <div class="flex gap-2 shrink-0">
+                                <button onclick="removeMenuStatPoint('sta')" class="bg-red-700 hover:bg-red-500 text-white font-bold w-8 h-8 flex items-center justify-center border-2 border-white text-sm">-</button>
+                                <button onclick="addMenuStatPoint('sta')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold w-8 h-8 flex items-center justify-center border-2 border-white text-sm">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-full flex flex-col sm:flex-row items-stretch gap-3">
+                        <button onclick="randomizeMenuStats()" class="sm:w-2/5 bg-amber-500 hover:bg-amber-400 active:translate-y-0.5 text-black font-p5 text-sm sm:text-base py-3 px-4 border-4 border-white uppercase shadow-[4px_4px_0px_#000] transition-all flex items-center justify-center gap-2 cursor-pointer">
+                            <span>RANDOMIZAR</span>
+                        </button>
+                        <button onclick="confirmMenuStatsAndLaunch()" class="sm:w-3/5 bg-red-600 hover:bg-red-500 active:translate-y-0.5 text-white font-p5 text-base sm:text-xl py-3 px-4 border-4 border-white uppercase shadow-[4px_4px_0px_#000] transition-all flex items-center justify-center cursor-pointer">
+                            INICIAR HORDA
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="menuFooter" class="relative z-20 flex justify-between items-center bg-black/95 px-4 py-3 border-t-4 border-white mt-6 shrink-0 shadow-[0_-4px_0px_#000]">
+            <button id="btnMenuBack" onclick="handleMenuBack()" class="hidden px-4 py-2 sm:px-6 bg-yellow-500 hover:bg-yellow-400 active:translate-y-0.5 text-black font-black text-xs sm:text-sm uppercase border-2 border-white shadow-[4px_4px_0px_#e60012] cursor-pointer">
+                ← VOLTAR
+            </button>
+            <div id="menuStatusText" class="font-p5alt text-yellow-400 text-[10px] sm:text-xs ml-auto">
+                RUSH! SURVIVAL ENGINE v2.0 (SOCKET.IO)
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CRIAR SALA MULTIPLAYER -->
+    <div id="createRoomModal" class="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4 opacity-0 invisible pointer-events-none transition-opacity duration-200">
+        <div class="bg-zinc-950 border-4 border-blue-500 p-6 max-w-md w-full shadow-[8px_8px_0px_#000]">
+            <h2 class="text-2xl font-p5 text-blue-400 mb-4 uppercase" style="text-shadow: 2px 2px 0 #000;">CRIAR NOVA SALA</h2>
+            <div class="space-y-3 text-left text-xs sm:text-sm">
+                <div>
+                    <label class="block text-gray-300 font-bold mb-1">NOME DA SALA</label>
+                    <input type="text" id="mpRoomName" class="w-full bg-black border-2 border-gray-600 text-white px-3 py-2" placeholder="Ex: Horda dos Ladrões">
+                </div>
+                <div>
+                    <label class="block text-gray-300 font-bold mb-1">SENHA (OPCIONAL)</label>
+                    <input type="password" id="mpRoomPass" class="w-full bg-black border-2 border-gray-600 text-white px-3 py-2" placeholder="Deixe vazio para pública">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-gray-300 font-bold mb-1">DIFICULDADE</label>
+                        <select id="mpRoomDiff" class="w-full bg-black border-2 border-gray-600 text-white px-3 py-2">
+                            <option value="easy">FÁCIL</option>
+                            <option value="normal" selected>NORMAL</option>
+                            <option value="hard">DIFÍCIL</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 font-bold mb-1">MÁX. JOGADORES</label>
+                        <select id="mpRoomMax" class="w-full bg-black border-2 border-gray-600 text-white px-3 py-2">
+                            <option value="2">2 Jogadores</option>
+                            <option value="3">3 Jogadores</option>
+                            <option value="4" selected>4 Jogadores</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="submitCreateRoom()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 border-2 border-white uppercase">CRIAR</button>
+                <button onclick="hideUI('createRoomModal')" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2.5 border-2 border-white uppercase">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE INVENTÁRIO -->
+    <div id="inventoryModal" class="absolute inset-0 z-40 bg-black/90 flex items-center justify-center p-2 md:p-8 opacity-0 invisible pointer-events-none transition-opacity duration-200">
+        <div class="flex flex-col md:flex-row gap-4 w-full h-full max-w-6xl">
+            <div class="w-full md:w-1/3 inv-panel-new p-4 flex flex-col h-full overflow-y-auto">
+                <div class="flex justify-between items-center mb-4 border-b-2 border-[#4c566a] pb-2">
+                    <h2 class="text-2xl font-black text-white tracking-widest uppercase" id="invCharClass">CLASSE</h2>
+                    <span class="text-yellow-400 font-bold bg-black px-2 py-1 border border-yellow-400 text-sm" id="invCharLevel">LVL 1</span>
+                </div>
+                <div class="w-full h-32 bg-[#1f242e] border-2 border-[#3b4252] flex items-center justify-center relative mb-4 shadow-inner">
+                    <span class="text-gray-600 font-bold text-xs uppercase tracking-widest absolute top-2">VISUAL DO HERÓI</span>
+                    <div id="invCharSprite" class="absolute inset-0 flex items-center justify-center transform scale-[2.0]"></div>
+                </div>
+                <p class="text-[10px] text-gray-400 font-bold uppercase mb-2 text-center">EQUIPAMENTOS ATIVOS</p>
+                <div class="grid grid-cols-4 gap-2 mb-4">
+                    <div id="eq-weapon" class="inv-slot-new aspect-square flex flex-col items-center justify-center relative" onclick="selectEquipSlot('weapon')"><span class="text-[8px] text-gray-500 font-bold absolute top-1">ARMA</span><div id="eq-weapon-img" class="absolute inset-0 flex items-center justify-center"></div></div>
+                    <div id="eq-helmet" class="inv-slot-new aspect-square flex flex-col items-center justify-center relative" onclick="selectEquipSlot('helmet')"><span class="text-[8px] text-gray-500 font-bold absolute top-1">ELMO</span><div id="eq-helmet-img" class="absolute inset-0 flex items-center justify-center"></div></div>
+                    <div id="eq-chest" class="inv-slot-new aspect-square flex flex-col items-center justify-center relative" onclick="selectEquipSlot('chest')"><span class="text-[8px] text-gray-500 font-bold absolute top-1">PEITO</span><div id="eq-chest-img" class="absolute inset-0 flex items-center justify-center"></div></div>
+                    <div id="eq-boots" class="inv-slot-new aspect-square flex flex-col items-center justify-center relative" onclick="selectEquipSlot('boots')"><span class="text-[8px] text-gray-500 font-bold absolute top-1">BOTA</span><div id="eq-boots-img" class="absolute inset-0 flex items-center justify-center"></div></div>
+                </div>
+
+                <div class="bg-[#1f242e] p-4 text-xs font-bold text-white space-y-2 mt-auto border-2 border-[#3b4252]">
+                    <div class="flex justify-between"><span class="text-red-400">♥ VIDA MÁX</span> <span id="invStatHp">100</span></div>
+                    <div class="flex justify-between"><span class="text-blue-400">⚡ STAM/MANA</span> <span id="invStatSta">100</span></div>
+                    <div class="flex justify-between"><span class="text-yellow-400">⚔️ DANO MULT</span> <span id="invStatDmg">x1.0</span></div>
+                    <div class="flex justify-between"><span class="text-emerald-400">👟 VELOCIDADE</span> <span id="invStatSpd">250</span></div>
+                    <div class="flex justify-between mt-2 pt-2 border-t border-gray-600"><span class="text-yellow-500 text-sm">💰 OURO TOTAL</span> <span id="invStatGold" class="text-sm">0 G</span></div>
+                </div>
+            </div>
+
+            <div class="w-full md:w-2/3 flex flex-col gap-4 h-full">
+                <div class="inv-panel-new p-4 flex-1 flex flex-col overflow-y-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-white uppercase tracking-widest">MOCHILA (MAX 24)</h2>
+                        <button onclick="closeInventory()" class="bg-red-600 hover:bg-red-500 text-white px-4 py-1.5 font-bold border-2 border-white shadow-[2px_2px_0px_#000] text-sm uppercase">Fechar X</button>
+                    </div>
+                    <div id="invGrid" class="grid grid-cols-5 sm:grid-cols-6 lg:grid-cols-8 gap-2 pb-2"></div>
+                </div>
+                
+                <div class="inv-panel-new p-4 h-40 shrink-0 flex items-center justify-center bg-gradient-to-t from-[#1f242e] to-[#2e3440]">
+                    <div id="invEmptyDetails" class="text-gray-500 font-bold uppercase tracking-widest text-sm text-center w-full">
+                        Selecione um item para ver seus detalhes e equipar.
+                    </div>
+                    <div id="invItemDetails" class="hidden w-full h-full flex gap-4">
+                        <div id="invDetailIcon" class="w-24 h-24 bg-[#1f242e] border-2 border-[#4c566a] flex items-center justify-center shrink-0"></div>
+                        <div class="flex-1 flex flex-col justify-between">
+                            <div class="flex justify-between items-start gap-2">
+                                <div>
+                                    <h3 id="invDetailName" class="text-lg sm:text-xl font-black text-white uppercase">NOME</h3>
+                                    <span id="invDetailRarity" class="text-[10px] font-bold px-2 py-0.5 border inline-block mt-1 uppercase text-black bg-white">RARIDADE</span>
+                                </div>
+                                <button id="invEquipBtn" onclick="handleInventoryAction()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 border-2 border-white uppercase text-xs sm:text-sm">EQUIPAR / USAR</button>
+                            </div>
+                            <p id="invDetailDesc" class="text-xs sm:text-sm text-gray-300 mt-2 font-bold"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE BAÚ -->
+    <div id="chestModal" class="absolute inset-0 z-40 bg-black/85 flex items-center justify-center p-4 opacity-0 invisible pointer-events-none transition-opacity duration-200">
+        <div class="bg-black border-4 border-yellow-400 p-6 max-w-2xl w-full shadow-[8px_8px_0px_#000]">
+            <h2 id="chestModalTitle" class="text-3xl font-p5 text-yellow-400 text-center mb-2 uppercase" style="text-shadow: 3px 3px 0 #000;">BAÚ RECOMPENSA!</h2>
+            <p class="text-center text-sm text-gray-300 mb-6">ESCOLHA UMA RECOMPENSA PARA O SEU INVENTÁRIO:</p>
+            <div id="chestChoices" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+        </div>
+    </div>
+
+    <!-- MODAIS DE CONFIRMAÇÃO, PAUSA, GAMEOVER E RODA DE MAGIA -->
+    <div id="autoBalanceConfirmModal" class="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4 opacity-0 invisible pointer-events-none transition-opacity duration-200">
+        <div class="bg-zinc-950 border-4 border-yellow-400 p-6 max-w-md w-full text-center shadow-[8px_8px_0px_#000]">
+            <h2 class="text-2xl font-p5 text-yellow-400 mb-3 uppercase">TEM CERTEZA?</h2>
+            <p class="text-sm text-gray-200 mb-6 leading-relaxed">Você possui <strong id="unspentPointsModalCount" class="text-yellow-400">16</strong> pontos sobrando! Deseja distribuí-los automaticamente?</p>
+            <div class="flex gap-3">
+                <button onclick="confirmAutoBalanceAndLaunch()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 border-2 border-white">SIM, INICIAR</button>
+                <button onclick="cancelAutoBalanceModal()" class="flex-1 bg-neutral-700 hover:bg-neutral-600 text-white font-bold py-2 border-2 border-white">NÃO, VOLTAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pauseModal" class="absolute inset-0 z-50 bg-black/85 flex items-center justify-center p-4 opacity-0 invisible pointer-events-none transition-opacity duration-200">
+        <div class="bg-zinc-950 border-4 border-white p-6 max-w-md w-full text-center shadow-[10px_10px_0px_#e60012]">
+            <h2 class="text-3xl font-p5 text-white mb-2 uppercase" style="text-shadow: 3px 3px 0 #e60012;">JOGO PAUSADO</h2>
+            <p class="text-xs text-gray-300 mb-6 uppercase">O progresso da última wave concluída está salvo.</p>
+            <div class="space-y-3">
+                <button onclick="resumeFromPauseModal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 border-2 border-white uppercase">CONTINUAR</button>
+                <button onclick="attemptReturnToMenu()" class="w-full bg-white hover:bg-red-600 text-black hover:text-white font-bold py-3 border-2 border-black uppercase">VOLTAR PARA O MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="fleeModal" class="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4 opacity-0 invisible pointer-events-none transition-opacity duration-200">
+        <div class="bg-red-950 border-4 border-red-500 p-6 max-w-md w-full text-center shadow-[10px_10px_0px_#000]">
+            <h2 class="text-3xl font-p5 text-red-400 mb-2 uppercase">COMBATE EM ANDAMENTO!</h2>
+            <p class="text-xs sm:text-sm text-gray-200 mb-6 leading-relaxed">Sair durante a wave ativa causará <strong class="text-yellow-400">punição de recuo de horda</strong>.</p>
+            <div class="space-y-3">
+                <button onclick="resumeFromPauseModal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 border-2 border-white uppercase">VOLTAR PARA A BATALHA</button>
+                <button onclick="abandonWaveAndExit()" class="w-full bg-red-700 hover:bg-red-600 text-white font-bold py-3 border-2 border-white uppercase">ABANDONAR HORDA</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="gameOverModal" class="absolute inset-0 z-50 bg-black/95 flex items-center justify-center p-4 opacity-0 invisible pointer-events-none transition-opacity duration-200">
+        <div class="bg-red-950 border-8 border-red-600 p-8 max-w-md w-full text-center shadow-[16px_16px_0px_#000]">
+            <h1 class="text-5xl font-p5 text-red-500 mb-2 uppercase" style="text-shadow: 4px 4px 0 #000;">VOCÊ MORREU!</h1>
+            <p class="text-gray-300 font-p5alt text-sm mb-6">Sua jornada nesta horda foi interrompida.</p>
+            <div class="space-y-3">
+                <button onclick="restartGameFromGameOver()" class="w-full bg-emerald-600 text-white font-bold text-lg py-3 border-4 border-white hover:bg-emerald-500 uppercase">REINICIAR PARTIDA</button>
+                <button onclick="returnToMainMenu()" class="w-full bg-white text-black font-bold text-lg py-3 border-4 border-black hover:bg-red-600 hover:text-white uppercase">MENU PRINCIPAL</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="mageWheelModal" class="absolute inset-0 z-50 bg-black/85 flex items-center justify-center p-4 opacity-0 invisible pointer-events-none transition-opacity duration-200">
+        <div class="bg-zinc-950 border-4 border-blue-500 p-6 max-w-md w-full text-center shadow-[10px_10px_0px_#000]">
+            <h2 class="text-2xl font-p5 text-blue-400 mb-4 uppercase">ESCOLHA O ELEMENTO ARCANA</h2>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <button onclick="setMageElement('water')" class="bg-blue-700 hover:bg-blue-600 text-white font-bold py-3 border-2 border-white uppercase">ÁGUA (LENTIDÃO)</button>
+                <button onclick="setMageElement('fire')" class="bg-red-700 hover:bg-red-600 text-white font-bold py-3 border-2 border-white uppercase">FOGO (DANO ALTO)</button>
+                <button onclick="setMageElement('earth')" class="bg-amber-700 hover:bg-amber-600 text-white font-bold py-3 border-2 border-white uppercase">TERRA (IMPACTO)</button>
+                <button onclick="setMageElement('air')" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-3 border-2 border-white uppercase">VENTO (VELOZ)</button>
+            </div>
+            <button onclick="resumeFromPauseModal()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2 border-2 border-white text-xs uppercase">CANCELAR</button>
+        </div>
+    </div>
+
+    <!-- MÓDULO DE CONEXÃO MULTIPLAYER (SOCKET.IO) -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        let socket;
+        
+        window.CloudSync = {
+            isCloudReady: true,
+            init: async () => {
+                try {
+                    // Substitua pela URL do seu servidor hospedado quando for colocar online (ex: Render/Railway)
+                    socket = io("http://localhost:3000"); 
+                    
+                    return new Promise((resolve) => {
+                        socket.on("connect", () => {
+                            console.log("Conectado ao servidor Socket.io. ID:", socket.id);
+                            const statusEl = document.getElementById('socketConnectionStatus');
+                            if (statusEl) {
+                                statusEl.innerText = `Online (ID: ${socket.id.substring(0, 5).toUpperCase()})`;
+                                statusEl.className = "text-xs text-emerald-400 font-bold mt-1";
+                            }
+                            resolve(true);
+                        });
+                        socket.on("connect_error", (err) => {
+                            console.warn("Erro ao conectar no Socket.io:", err);
+                            const statusEl = document.getElementById('socketConnectionStatus');
+                            if (statusEl) {
+                                statusEl.innerText = "Servidor offline (rodando localmente)";
+                                statusEl.className = "text-xs text-red-400 font-bold mt-1";
+                            }
+                            resolve(false);
+                        });
+                    });
+                } catch (e) {
+                    console.warn("Falha ao iniciar o Socket.io, operando localmente:", e);
+                    return false;
+                }
+            },
+            listenRooms: (callback) => {
+                if (!socket) return;
+                socket.emit("getRooms");
+                socket.on("updateRooms", (rooms) => {
+                    callback(rooms);
+                });
+            },
+            createRoom: async (roomName, roomPass, roomDiff, maxPlayers = 4) => {
+                if (!socket || !socket.connected) return 'local-' + Date.now();
+                
+                const roomData = {
+                    roomName: roomName || 'Sala sem nome',
+                    hasPassword: !!roomPass,
+                    password: roomPass || '',
+                    difficulty: roomDiff || 'normal',
+                    maxPlayers: parseInt(maxPlayers, 10) || 4,
+                    status: 'waiting',
+                    playersCount: 1,
+                    wave: 1
+                };
+                
+                return new Promise((resolve) => {
+                    socket.emit("createRoom", roomData, (roomId) => {
+                        resolve(roomId);
+                    });
+                });
+            }
+        };
+    </script>
+
+    <!-- SCRIPT PRINCIPAL DO JOGO -->
+    <script>
+        const SAVE_SLOTS_KEY = 'RUSH_SAVE_SLOTS_V11';
+        let activeSlotIndex = null;
+        let tempCharacterData = null;
+        let menuStage = 'mode'; // 'mode' | 'saves' | 'class' | 'stats' | 'mp_lobby'
+        let selectedInvItemUid = null;
+        let activeChestRef = null;
+
+        const BIOMES = [
+            { id: 'forest', name: 'FLORESTA ANTIGA', bg: '#07170d', grid: '#10301c', particleColor: '#4ade80' },
+            { id: 'cave', name: 'CAVERNA SOMBRIA', bg: '#121016', grid: '#26202e', particleColor: '#c084fc' }
+        ];
+
+        function getSlotsData() {
+            try { const raw = localStorage.getItem(SAVE_SLOTS_KEY); return raw ? JSON.parse(raw) : [null, null, null, null]; }
+            catch(e) { return [null, null, null, null]; }
+        }
+        function saveSlotsData(slots) { try { localStorage.setItem(SAVE_SLOTS_KEY, JSON.stringify(slots)); } catch(e) {} }
+
+        function showUI(id) {
+            const el = document.getElementById(id);
+            if(el) {
+                el.classList.remove('opacity-0', 'invisible');
+                if (id !== 'gameHUD' && id !== 'waveStartModal') el.classList.add('pointer-events-auto');
+            }
+        }
+        function hideUI(id) {
+            const el = document.getElementById(id);
+            if(el) {
+                el.classList.add('opacity-0', 'invisible');
+                if (id !== 'gameHUD' && id !== 'waveStartModal') el.classList.remove('pointer-events-auto');
+            }
+        }
+
+        const SoundFX = {
+            synth: null,
+            init() {
+                if (this.synth || typeof Tone === 'undefined') return;
+                try {
+                    if (Tone.context.state !== 'running') Tone.start();
+                    this.synth = new Tone.PolySynth(Tone.Synth, {
+                        oscillator: { type: 'square' }, envelope: { attack: 0.005, decay: 0.08, sustain: 0.02, release: 0.08 }
+                    }).toDestination();
+                    this.synth.volume.value = -14;
+                } catch(e) {}
+            },
+            play(note, dur = '16n') {
+                try {
+                    if (!this.synth) this.init();
+                    if (this.synth && Tone.context && Tone.context.state === 'running') this.synth.triggerAttackRelease(note, dur);
+                } catch(e) {}
+            }
+        };
+
+        const RARITIES = [
+            { name: 'COMUM', color: '#9ca3af', badge: 'bg-gray-400 text-black', mult: 1.0, weight: 45 },
+            { name: 'INCOMUM', color: '#22c55e', badge: 'bg-green-500 text-black', mult: 1.25, weight: 25 },
+            { name: 'RARO', color: '#3b82f6', badge: 'bg-blue-500 text-white', mult: 1.55, weight: 15 },
+            { name: 'ÉPICO', color: '#a855f7', badge: 'bg-purple-500 text-white', mult: 2.0, weight: 9 },
+            { name: 'LENDÁRIO', color: '#eab308', badge: 'bg-yellow-400 text-black', mult: 2.7, weight: 4.5 },
+            { name: 'MÍTICO', color: '#ef4444', badge: 'bg-red-600 text-white', mult: 3.6, weight: 1.5 }
+        ];
+
+        const ITEM_TEMPLATES = {
+            sword_iron: { id: 'sword_iron', name: 'Espada de Ferro', slot: 'weapon', rarity: 'COMUM', rarityColor: 'bg-gray-400 text-black', desc: '+15% Dano Base', dmgMult: 0.15, specialType: 'spin', svg: `<svg viewBox="0 0 24 24" class="w-10 h-10"><path fill="#cbd5e1" d="M18 3h3v3l-9 9-3-3 9-9z"/><path fill="#eab308" d="M6 12l6 6-1.5 1.5-6-6z"/></svg>` },
+            sword_flame: { id: 'sword_flame', name: 'Lâmina Carmesim', slot: 'weapon', rarity: 'ÉPICO', rarityColor: 'bg-purple-500 text-white', desc: '+45% Dano | Especial: Onda Sísmica', dmgMult: 0.45, specialType: 'shockwave', svg: `<svg viewBox="0 0 24 24" class="w-10 h-10"><path fill="#ef4444" d="M18 3h3v3l-9 9-3-3 9-9z"/><path fill="#facc15" d="M6 12l6 6-1.5 1.5-6-6z"/></svg>` },
+            scythe_mythic: { id: 'scythe_mythic', name: 'Foice Ceifadora', slot: 'weapon', rarity: 'MÍTICO', rarityColor: 'bg-red-600 text-white', desc: '+110% Dano | Especial: Ceifar Almas', dmgMult: 1.10, specialType: 'reap', svg: `<svg viewBox="0 0 24 24" class="w-10 h-10"><path fill="#dc2626" d="M4 4c8-2 14 2 16 10l-4-2c-1-4-5-6-10-5z"/><path fill="#78350f" d="M6 6l12 14-2 2L4 8z"/></svg>` },
+            staff_apprentice: { id: 'staff_apprentice', name: 'Cajado Arcano', slot: 'weapon', rarity: 'COMUM', rarityColor: 'bg-gray-400 text-black', desc: '+15% Dano Mágico', dmgMult: 0.15, specialType: 'nova', svg: `<svg viewBox="0 0 24 24" class="w-10 h-10"><path fill="#78350f" d="M5 19l11-11 2 2-11 11z"/><circle cx="17" cy="7" r="3.5" fill="#38bdf8"/></svg>` },
+            bow_hunter: { id: 'bow_hunter', name: 'Arco de Caçador', slot: 'weapon', rarity: 'COMUM', rarityColor: 'bg-gray-400 text-black', desc: '+15% Dano à Distância', dmgMult: 0.15, specialType: 'pierce', svg: `<svg viewBox="0 0 24 24" class="w-10 h-10"><path fill="none" stroke="#a16207" stroke-width="3" d="M6 4c8 4 8 12 0 16"/><line x1="6" y1="4" x2="6" y2="20" stroke="#e5e7eb" stroke-width="1.5"/></svg>` },
+            armor_iron: { id: 'armor_iron', name: 'Peitoral Reforçado', slot: 'chest', rarity: 'INCOMUM', rarityColor: 'bg-green-500 text-black', desc: '+60 HP Máximo', hpBonus: 60, svg: `<svg viewBox="0 0 24 24" class="w-10 h-10"><path fill="#64748b" d="M6 4h12l2 5v11H4V9l2-5z"/></svg>` },
+            boots_swift: { id: 'boots_swift', name: 'Botas Velozes', slot: 'boots', rarity: 'RARO', rarityColor: 'bg-blue-500 text-white', desc: '+45 Velocidade de Movimento', spdBonus: 45, svg: `<svg viewBox="0 0 24 24" class="w-10 h-10"><path fill="#2563eb" d="M6 4h6v10h6v6H6V4z"/></svg>` },
+            potion_hp: { id: 'potion_hp', name: 'Poção de Vida', slot: 'consumable', rarity: 'COMUM', rarityColor: 'bg-gray-400 text-black', desc: 'Restaura 60% do HP Máximo.', healPct: 0.6, svg: `<svg viewBox="0 0 24 24" class="w-10 h-10"><path fill="#dc2626" d="M8 8h8l2 4v7a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-7l2-4z"/><rect x="10" y="4" width="4" height="4" fill="#d97706"/></svg>` }
+        };
+
+        function createItemInstance(id) {
+            const tpl = ITEM_TEMPLATES[id];
+            return tpl ? { ...tpl, uid: Math.random().toString(36).slice(2, 10) } : null;
+        }
+        function getStarterWeapon(cls) {
+            if (cls === 'mage') return createItemInstance('staff_apprentice');
+            if (cls === 'archer') return createItemInstance('bow_hunter');
+            return createItemInstance('sword_iron');
+        }
+
+        // NAVEGAÇÃO DE MENUS COM TRANSIÇÃO PERSONA 5
+        function switchMenuStage(stage) {
+            menuStage = stage;
+            ['menuModeSelect', 'menuSaveSelect', 'menuClassSelect', 'menuStatsSelect', 'menuMultiplayerLobby'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add('hidden');
+                    el.classList.remove('flex', 'p5-modal-in');
+                }
+            });
+
+            const backBtn = document.getElementById('btnMenuBack');
+            const sub = document.getElementById('menuSubtitle');
+
+            if (stage === 'mode') {
+                backBtn.classList.add('hidden');
+                sub.innerText = 'SELECIONE O MODO DE JOGO';
+                const el = document.getElementById('menuModeSelect');
+                el.classList.remove('hidden');
+                void el.offsetWidth;
+                el.classList.add('p5-modal-in');
+            } else if (stage === 'saves') {
+                backBtn.classList.remove('hidden');
+                sub.innerText = 'GERENCIADOR DE SAVES (4 SLOTS)';
+                const el = document.getElementById('menuSaveSelect');
+                el.classList.remove('hidden');
+                void el.offsetWidth;
+                el.classList.add('p5-modal-in');
+                renderSaveSlots();
+            } else if (stage === 'class') {
+                backBtn.classList.remove('hidden');
+                sub.innerText = 'ESCOLHA DE CLASSE DEFINITIVA';
+                const el = document.getElementById('menuClassSelect');
+                el.classList.remove('hidden');
+                void el.offsetWidth;
+                el.classList.add('flex', 'p5-modal-in');
+            } else if (stage === 'stats') {
+                backBtn.classList.remove('hidden');
+                sub.innerText = 'CUSTOMIZAÇÃO DE ATRIBUTOS';
+                const el = document.getElementById('menuStatsSelect');
+                el.classList.remove('hidden');
+                void el.offsetWidth;
+                el.classList.add('flex', 'p5-modal-in');
+            } else if (stage === 'mp_lobby') {
+                backBtn.classList.remove('hidden');
+                sub.innerText = 'MULTIPLAYER ONLINE (SOCKET.IO)';
+                const el = document.getElementById('menuMultiplayerLobby');
+                el.classList.remove('hidden');
+                void el.offsetWidth;
+                el.classList.add('flex', 'p5-modal-in');
+            }
+        }
+
+        function handleMenuBack() {
+            SoundFX.play('C4');
+            if (menuStage === 'saves' || menuStage === 'mp_lobby') switchMenuStage('mode');
+            else if (menuStage === 'class') switchMenuStage('saves');
+            else if (menuStage === 'stats') switchMenuStage('class');
+        }
+
+        function goToSaveSelect() {
+            SoundFX.init();
+            SoundFX.play('E5');
+            switchMenuStage('saves');
+        }
+
+        async function goToMultiplayerLobby() {
+            SoundFX.init();
+            SoundFX.play('G5');
+            switchMenuStage('mp_lobby');
+            await window.CloudSync.init();
+            window.CloudSync.listenRooms((rooms) => {
+                renderMultiplayerRooms(rooms);
+            });
+        }
+
+        function renderMultiplayerRooms(rooms) {
+            const container = document.getElementById('roomListContainer');
+            container.innerHTML = '';
+            if (!rooms || rooms.length === 0) {
+                container.innerHTML = `<p class="text-gray-400 text-sm col-span-2 text-center py-8">Nenhuma sala ativa no momento. Clique em "+ CRIAR SALA" para hospedar!</p>`;
+                return;
+            }
+            rooms.forEach(room => {
+                const div = document.createElement('div');
+                div.className = 'bg-neutral-900 border-2 border-blue-500 p-4 flex justify-between items-center shadow-[4px_4px_0px_#000]';
+                div.innerHTML = `
+                    <div>
+                        <h3 class="text-white font-bold text-base uppercase">${room.roomName} ${room.hasPassword ? '🔒' : ''}</h3>
+                        <p class="text-xs text-gray-400 mt-1">Host: ${room.hostName || 'Anônimo'} | Dif: <span class="text-yellow-400 uppercase">${room.difficulty}</span></p>
+                    </div>
+                    <div class="text-right">
+                        <span class="block text-xs font-bold text-emerald-400 mb-1">${room.playersCount || 1}/${room.maxPlayers || 4} JOGADORES</span>
+                        <button onclick="joinMultiplayerRoom('${room.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1 border border-white text-xs uppercase">ENTRAR</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function openCreateRoomModal() {
+            showUI('createRoomModal');
+        }
+
+        async function submitCreateRoom() {
+            const name = document.getElementById('mpRoomName').value.trim();
+            const pass = document.getElementById('mpRoomPass').value;
+            const diff = document.getElementById('mpRoomDiff').value;
+            const max = document.getElementById('mpRoomMax').value;
+            hideUI('createRoomModal');
+            await window.CloudSync.createRoom(name, pass, diff, max);
+            activeSlotIndex = 0;
+            document.getElementById('currentSlotDisplay').innerText = 'MP';
+            switchMenuStage('class');
+        }
+
+        function joinMultiplayerRoom(roomId) {
+            activeSlotIndex = 0;
+            document.getElementById('currentSlotDisplay').innerText = 'MP';
+            switchMenuStage('class');
+        }
+
+        function renderSaveSlots() {
+            const slots = getSlotsData();
+            const container = document.getElementById('menuSaveSelect');
+            container.innerHTML = '';
+            const classNames = { warrior: 'GUERREIRO', mage: 'ARCANISTA', archer: 'SENTINELA' };
+
+            for (let i = 0; i < 4; i++) {
+                const card = document.createElement('div');
+                if (slots[i]) {
+                    const s = slots[i];
+                    const clsLabel = classNames[s.player.classType] || 'HERÓI';
+                    card.className = `p5-card bg-black border-4 border-yellow-400 p-5 flex flex-col justify-between min-h-[160px]`;
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 uppercase border border-white">🔒 CLASSE FIXA</span>
+                                <h3 class="text-2xl font-p5 text-white mt-1 uppercase">${clsLabel}</h3>
+                                <p class="text-xs text-yellow-400 font-bold mt-1">SLOT ${i+1} • WAVE ${s.currentWave || 1} • LVL ${s.player.level || 1}</p>
+                            </div>
+                            <button onclick="deleteSaveSlot(event, ${i})" class="bg-zinc-900 hover:bg-red-700 text-white px-2.5 py-1 border border-gray-500 text-xs font-bold uppercase" title="Apagar Save">APAGAR</button>
+                        </div>
+                        <button onclick="loadSlotGame(${i})" class="mt-4 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 border-2 border-white shadow-[3px_3px_0px_#000] uppercase text-sm">
+                            CONTINUAR AVENTURA
+                        </button>
+                    `;
+                } else {
+                    card.className = `p5-card bg-neutral-950 border-4 border-dashed border-gray-600 hover:border-white p-5 cursor-pointer flex flex-col items-center justify-center min-h-[160px]`;
+                    card.onclick = () => {
+                        SoundFX.play('E5');
+                        activeSlotIndex = i;
+                        document.getElementById('currentSlotDisplay').innerText = i + 1;
+                        switchMenuStage('class');
+                    };
+                    card.innerHTML = `
+                        <span class="text-xs text-gray-500 font-bold mb-1">SLOT ${i+1} VAZIO</span>
+                        <h3 class="text-xl font-p5 text-gray-300 uppercase">+ NOVO SAVE</h3>
+                    `;
+                }
+                container.appendChild(card);
+            }
+        }
+
+        function deleteSaveSlot(e, idx) {
+            e.stopPropagation();
+            const slots = getSlotsData();
+            slots[idx] = null;
+            saveSlotsData(slots);
+            renderSaveSlots();
+        }
+
+        function selectClassAndStart(classType) {
+            SoundFX.play('G5');
+            const classLabels = { warrior: 'GUERREIRO', mage: 'ARCANISTA', archer: 'SENTINELA' };
+            document.getElementById('menuStatsClassTitle').innerText = classLabels[classType];
+
+            tempCharacterData = {
+                slotIndex: activeSlotIndex,
+                currentWave: 1,
+                abandonCount: 0,
+                player: {
+                    classType,
+                    level: 1,
+                    xp: 0,
+                    nextXp: 100,
+                    gold: 50,
+                    stats: { str: 1, spd: 1, dur: 1, sta: 1 },
+                    statPoints: 16,
+                    inventory: [createItemInstance('potion_hp')],
+                    equipment: { weapon: getStarterWeapon(classType), helmet: null, chest: null, boots: null }
+                }
+            };
+            switchMenuStage('stats');
+            updateMenuStatsUI();
+        }
+
+        function loadSlotGame(slotIdx) {
+            SoundFX.play('C6');
+            activeSlotIndex = slotIdx;
+            const slots = getSlotsData();
+            tempCharacterData = slots[slotIdx];
+            if (tempCharacterData.player.statPoints > 0) {
+                switchMenuStage('stats');
+                updateMenuStatsUI();
+            } else {
+                launchGameFromTempData();
+            }
+        }
+
+        function addMenuStatPoint(stat) {
+            if (!tempCharacterData || tempCharacterData.player.statPoints <= 0) return;
+            const maxLimits = { str: 5, spd: 12, dur: 5, sta: 12 };
+            if (tempCharacterData.player.stats[stat] >= maxLimits[stat]) return;
+            tempCharacterData.player.stats[stat]++;
+            tempCharacterData.player.statPoints--;
+            SoundFX.play('A4');
+            updateMenuStatsUI();
+        }
+
+        function removeMenuStatPoint(stat) {
+            if (!tempCharacterData || tempCharacterData.player.stats[stat] <= 1) return;
+            tempCharacterData.player.stats[stat]--;
+            tempCharacterData.player.statPoints++;
+            SoundFX.play('F4');
+            updateMenuStatsUI();
+        }
+
+        function updateMenuStatsUI() {
+            const p = tempCharacterData.player;
+            document.getElementById('menuStatPointsLeft').innerText = p.statPoints;
+            document.getElementById('menuValStr').innerText = p.stats.str;
+            document.getElementById('menuValSpd').innerText = p.stats.spd;
+            document.getElementById('menuValDur').innerText = p.stats.dur;
+            document.getElementById('menuValSta').innerText = p.stats.sta;
+        }
+
+        function randomizeMenuStats() {
+            const p = tempCharacterData.player;
+            p.stats = { str: 1, spd: 1, dur: 1, sta: 1 };
+            p.statPoints = 16;
+            const keys = ['str', 'spd', 'dur', 'sta'];
+            while(p.statPoints > 0) {
+                const k = keys[Math.floor(Math.random()*keys.length)];
+                if ((k==='str' || k==='dur') && p.stats[k] >= 5) continue;
+                p.stats[k]++;
+                p.statPoints--;
+            }
+            SoundFX.play('E5');
+            updateMenuStatsUI();
+        }
+
+        function confirmMenuStatsAndLaunch() {
+            if (tempCharacterData.player.statPoints > 0) {
+                document.getElementById('unspentPointsModalCount').innerText = tempCharacterData.player.statPoints;
+                showUI('autoBalanceConfirmModal');
+            } else {
+                launchGameFromTempData();
+            }
+        }
+
+        function confirmAutoBalanceAndLaunch() {
+            const p = tempCharacterData.player;
+            const keys = ['spd', 'sta', 'str', 'dur'];
+            while(p.statPoints > 0) {
+                for (let k of keys) {
+                    if (p.statPoints <= 0) break;
+                    if ((k==='str' || k==='dur') && p.stats[k] >= 5) continue;
+                    p.stats[k]++; p.statPoints--;
+                }
+            }
+            hideUI('autoBalanceConfirmModal');
+            launchGameFromTempData();
+        }
+        function cancelAutoBalanceModal() { hideUI('autoBalanceConfirmModal'); }
+
+        function launchGameFromTempData() {
+            const slots = getSlotsData();
+            if (activeSlotIndex !== null) {
+                slots[activeSlotIndex] = JSON.parse(JSON.stringify(tempCharacterData));
+                saveSlotsData(slots);
+            }
+            document.getElementById('mainMenu').classList.add('hidden');
+            showUI('gameHUD');
+            game.startSession(tempCharacterData);
+        }
+
+        function returnToMainMenu() {
+            game.isRunning = false; game.isPaused = false;
+            ['gameHUD','pauseModal','fleeModal','gameOverModal','mageWheelModal','inventoryModal','chestModal'].forEach(hideUI);
+            document.getElementById('mainMenu').classList.remove('hidden');
+            switchMenuStage('saves');
+        }
+
+        function togglePauseMenu() {
+            if (!game.isRunning) return;
+            game.isPaused = !game.isPaused;
+            if (game.isPaused) {
+                showUI('pauseModal');
+            } else {
+                hideUI('pauseModal');
+                hideUI('fleeModal');
+            }
+        }
+        function resumeFromPauseModal() {
+            game.isPaused = false;
+            hideUI('pauseModal'); hideUI('fleeModal'); hideUI('mageWheelModal');
+        }
+        function attemptReturnToMenu() {
+            hideUI('pauseModal');
+            if (!game.inPrepPhase && (game.enemies.length > 0 || game.enemiesToSpawn.length > 0)) {
+                showUI('fleeModal');
+            } else {
+                returnToMainMenu();
+            }
+        }
+        function abandonWaveAndExit() {
+            hideUI('fleeModal');
+            if (activeSlotIndex !== null) {
+                const slots = getSlotsData();
+                if (slots[activeSlotIndex]) {
+                    slots[activeSlotIndex].currentWave = Math.max(1, (slots[activeSlotIndex].currentWave || 1) - 1);
+                    saveSlotsData(slots);
+                }
+            }
+            returnToMainMenu();
+        }
+        function restartGameFromGameOver() {
+            hideUI('gameOverModal');
+            const slots = getSlotsData();
+            if (activeSlotIndex !== null && slots[activeSlotIndex]) {
+                game.startSession(slots[activeSlotIndex]);
+            }
+        }
+
+        function setMageElement(elem) {
+            if (game && game.player) {
+                game.player.mageElement = elem;
+                const names = { fire: 'FOGO', water: 'ÁGUA', earth: 'TERRA', air: 'VENTO' };
+                document.getElementById('activeMageElem').innerText = names[elem] || 'FOGO';
+                SoundFX.play('B5');
+            }
+            resumeFromPauseModal();
+        }
+
+        // INVENTÁRIO
+        function openInventory() {
+            if (!game.isRunning) return;
+            selectedInvItemUid = null;
+            renderInventoryUI();
+            showUI('inventoryModal');
+        }
+        function closeInventory() {
+            hideUI('inventoryModal');
+        }
+        function renderInventoryUI() {
+            const p = game.player;
+            const classNames = { warrior: 'GUERREIRO', mage: 'ARCANISTA', archer: 'SENTINELA' };
+            document.getElementById('invCharClass').innerText = classNames[p.classType] || 'HERÓI';
+            document.getElementById('invCharLevel').innerText = `LVL ${p.level}`;
+            document.getElementById('invCharSprite').innerHTML = renderOldDesignSVG(p.classType);
+
+            ['weapon', 'helmet', 'chest', 'boots'].forEach(slot => {
+                const imgBox = document.getElementById(`eq-${slot}-img`);
+                if (imgBox) imgBox.innerHTML = p.equipment[slot] ? p.equipment[slot].svg : '';
+            });
+
+            document.getElementById('invStatHp').innerText = `${Math.round(p.hp)} / ${p.getMaxHp()}`;
+            document.getElementById('invStatSta').innerText = `${Math.round(p.stamina)} / ${p.getMaxStamina()}`;
+            document.getElementById('invStatDmg').innerText = `x${p.getDamageMultiplier().toFixed(2)}`;
+            document.getElementById('invStatSpd').innerText = p.getMoveSpeed();
+            document.getElementById('invStatGold').innerText = `${p.gold} G`;
+
+            const grid = document.getElementById('invGrid');
+            grid.innerHTML = '';
+            for (let i = 0; i < 24; i++) {
+                const item = p.inventory[i];
+                const slotDiv = document.createElement('div');
+                slotDiv.className = `inv-slot-new aspect-square flex items-center justify-center relative ${item && item.uid === selectedInvItemUid ? 'selected' : ''}`;
+                if (item) {
+                    slotDiv.innerHTML = item.svg;
+                    slotDiv.onclick = () => selectInvItem(item);
+                }
+                grid.appendChild(slotDiv);
+            }
+
+            if (!selectedInvItemUid) {
+                document.getElementById('invEmptyDetails').classList.remove('hidden');
+                document.getElementById('invItemDetails').classList.add('hidden');
+            }
+        }
+
+        function selectInvItem(item) {
+            selectedInvItemUid = item.uid;
+            renderInventoryUI();
+            document.getElementById('invEmptyDetails').classList.add('hidden');
+            document.getElementById('invItemDetails').classList.remove('hidden');
+            document.getElementById('invDetailIcon').innerHTML = item.svg;
+            document.getElementById('invDetailName').innerText = item.name;
+            const rarBadge = document.getElementById('invDetailRarity');
+            rarBadge.innerText = item.rarity;
+            rarBadge.className = `text-[10px] font-bold px-2 py-0.5 border inline-block mt-1 uppercase ${item.rarityColor || 'bg-white text-black'}`;
+            document.getElementById('invDetailDesc').innerText = item.desc;
+        }
+
+        function selectEquipSlot(slot) {
+            const item = game.player.equipment[slot];
+            if (item) {
+                game.player.inventory.push(item);
+                game.player.equipment[slot] = null;
+                selectedInvItemUid = null;
+                renderInventoryUI();
+            }
+        }
+
+        function handleInventoryAction() {
+            const p = game.player;
+            const idx = p.inventory.findIndex(it => it.uid === selectedInvItemUid);
+            if (idx === -1) return;
+            const item = p.inventory[idx];
+
+            if (item.slot === 'consumable') {
+                if (item.healPct) p.hp = Math.min(p.getMaxHp(), p.hp + Math.round(p.getMaxHp() * item.healPct));
+                p.inventory.splice(idx, 1);
+            } else {
+                const prev = p.equipment[item.slot];
+                p.equipment[item.slot] = item;
+                p.inventory.splice(idx, 1);
+                if (prev) p.inventory.push(prev);
+            }
+            selectedInvItemUid = null;
+            SoundFX.play('E5');
+            renderInventoryUI();
+        }
+
+        function openStatsMenu() {
+            const p = game.player;
+            if (p && p.statPoints > 0) {
+                p.stats.str++;
+                p.statPoints--;
+                SoundFX.play('A5');
+                game.updateHUD();
+            }
+        }
+
+        // BAÚS E RECOMPENSAS
+        function openChestModal(chest) {
+            activeChestRef = chest;
+            game.isPaused = true;
+            document.getElementById('chestModalTitle').innerText = `BAÚ ${chest.rarity.name}!`;
+            const container = document.getElementById('chestChoices');
+            container.innerHTML = '';
+
+            const pool = ['sword_flame', 'scythe_mythic', 'armor_iron', 'boots_swift', 'potion_hp'];
+            for (let i = 0; i < 3; i++) {
+                const pickId = pool[Math.floor(Math.random() * pool.length)];
+                const item = createItemInstance(pickId);
+                const card = document.createElement('div');
+                card.className = 'bg-neutral-900 border-2 border-yellow-400 p-4 flex flex-col items-center text-center cursor-pointer hover:bg-neutral-800 transition-all';
+                card.innerHTML = `
+                    <div class="mb-2">${item.svg}</div>
+                    <span class="text-[10px] font-bold px-2 py-0.5 ${item.rarityColor} uppercase mb-1">${item.rarity}</span>
+                    <h4 class="text-white font-bold text-sm uppercase">${item.name}</h4>
+                    <p class="text-xs text-gray-300 mt-1 mb-3">${item.desc}</p>
+                    <button class="mt-auto w-full bg-emerald-600 text-white font-bold py-1.5 border border-white text-xs uppercase">PEGAR</button>
+                `;
+                card.onclick = () => claimChestReward(item);
+                container.appendChild(card);
+            }
+            showUI('chestModal');
+        }
+
+        function claimChestReward(item) {
+            if (game.player.inventory.length < 24) {
+                game.player.inventory.push(item);
+            }
+            if (activeChestRef) {
+                const idx = game.chestDrops.indexOf(activeChestRef);
+                if (idx !== -1) game.chestDrops.splice(idx, 1);
+                activeChestRef = null;
+            }
+            hideUI('chestModal');
+            game.isPaused = false;
+            SoundFX.play('C6');
+        }
+
+        function renderOldDesignSVG(cls = 'warrior') {
+            const p = (x,y,w,h,c) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
+            const tunic = cls === 'mage' ? '#2563eb' : (cls === 'archer' ? '#059669' : '#dc2626');
+            const head = p(4,1,4,4,'#fed7aa') + p(5,2,1,1,'#000') + p(7,2,1,1,'#000') + p(4,0,4,1,'#111827');
+            const body = p(2,5,2,6,tunic) + p(4,5,5,5,tunic) + p(4,10,5,1,'#facc15');
+            const legs = p(4,11,2,3,'#1e293b') + p(7,11,2,3,'#1e293b') + p(4,14,2,2,'#78350f') + p(7,14,2,2,'#78350f');
+            return `<svg viewBox="0 0 24 24" class="w-16 h-16" shape-rendering="crispEdges">${legs}${body}${head}</svg>`;
+        }
+
+        class Player {
+            constructor(data, x, y) {
+                const p = data.player;
+                this.classType = p.classType || 'warrior';
+                this.level = p.level || 1;
+                this.xp = p.xp || 0; this.nextXp = p.nextXp || 100;
+                this.gold = p.gold ?? 50;
+                this.stats = { str: p.stats.str||1, spd: p.stats.spd||1, dur: p.stats.dur||1, sta: p.stats.sta||1 };
+                this.statPoints = p.statPoints || 0;
+                this.equipment = Object.assign({ weapon: getStarterWeapon(this.classType) }, p.equipment || {});
+                this.inventory = p.inventory || [];
+                this.x = x; this.y = y; this.radius = 18;
+                this.hp = this.getMaxHp(); this.stamina = this.getMaxStamina(); this.specialCharge = 100;
+                this.attackCooldown = 0; this.invulnTimer = 0;
+                this.facingAngle = 0; this.isMoving = false;
+                this.specialActive = false; this.specialTimer = 0; this.bladeObj = null;
+                this.mageElement = 'fire';
+                this.mageShape = 1;
+            }
+            getEquipBonus(prop) { return Object.values(this.equipment).reduce((acc, item) => acc + (item && item[prop] ? item[prop] : 0), 0); }
+            getMaxHp() { return 140 + (this.stats.dur - 1) * 45 + this.getEquipBonus('hpBonus'); }
+            getMaxStamina() { return 100 + (this.stats.sta - 1) * 15 + this.getEquipBonus('staBonus'); }
+            getMoveSpeed() { return 245 + (this.stats.spd - 1) * 20 + this.getEquipBonus('spdBonus'); }
+            getDamageMultiplier() { return 1 + (this.stats.str - 1) * 0.15 + this.getEquipBonus('dmgMult'); }
+        }
+
+        class GameEngine {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas'); this.ctx = this.canvas.getContext('2d');
+                this.width = window.innerWidth; this.height = window.innerHeight;
+                this.keys = {}; this.mouse = { x: this.width/2, y: this.height/2, down: false };
+                this.isRunning = false; this.isPaused = false; this.inPrepPhase = false;
+                this.prepTimer = 0;
+                this.enemies = []; this.projectiles = []; this.chestDrops = []; this.slashEffects = [];
+                this.enemiesToSpawn = []; this.spawnTimer = 0; this.spawnInterval = 1.0;
+                this.bindEvents(); this.resize();
+            }
+            resize() { this.width = window.innerWidth; this.height = window.innerHeight; this.canvas.width = this.width; this.canvas.height = this.height; }
+            
+            bindEvents() {
+                window.addEventListener('resize', () => this.resize());
+                window.addEventListener('contextmenu', e => e.preventDefault());
+                window.addEventListener('keydown', e => {
+                    const key = e.key.toLowerCase(); this.keys[key] = true;
+                    if (key === 'escape') togglePauseMenu();
+                    if (!this.isRunning || this.isPaused) return;
+                    if (key === 'i') openInventory();
+                    if (key === 'f' && this.inPrepPhase) this.skipWaveWait();
+                    if (key === 'e') {
+                        let nearChest = this.chestDrops.find(c => Math.hypot(this.player.x - c.x, this.player.y - c.y) < 65);
+                        if (nearChest) openChestModal(nearChest); else this.playerSpecialAttack();
+                    }
+                    if (['1','2','3','4'].includes(key) && this.player && this.player.classType === 'mage') {
+                        this.player.mageShape = parseInt(key, 10);
+                        const shapes = { 1: 'TIRO RÁPIDO', 2: 'RAJADA TRIPLA', 3: 'ORBE PERFURANTE', 4: 'NOVA EXPLOSIVA' };
+                        document.getElementById('activeSpellShape').innerText = shapes[this.player.mageShape];
+                        SoundFX.play('D5');
+                    }
+                });
+                window.addEventListener('keyup', e => this.keys[e.key.toLowerCase()] = false);
+                this.canvas.addEventListener('mousemove', e => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    this.mouse.x = e.clientX - rect.left; this.mouse.y = e.clientY - rect.top;
+                });
+                this.canvas.addEventListener('mousedown', e => {
+                    if (!this.isRunning || this.isPaused) return; SoundFX.init();
+                    if (e.button === 0) { this.mouse.down = true; this.playerPrimaryAttack(); }
+                    if (e.button === 2 && this.player && this.player.classType === 'mage') {
+                        this.isPaused = true;
+                        showUI('mageWheelModal');
+                    }
+                });
+                window.addEventListener('mouseup', e => { if (e.button===0) this.mouse.down = false; });
+            }
+
+            startSession(sessionData) {
+                this.currentWave = sessionData.currentWave || 1;
+                this.player = new Player(sessionData, 0, 0);
+                this.isRunning = true; this.isPaused = false;
+                
+                const mageHud = document.getElementById('mageActiveShape');
+                if (this.player.classType === 'mage') mageHud.classList.remove('hidden');
+                else mageHud.classList.add('hidden');
+
+                this.startWave(this.currentWave);
+                this.lastTime = performance.now();
+            }
+
+            startWave(waveNum) {
+                this.currentWave = waveNum; this.inPrepPhase = false;
+                document.getElementById('waveBanner').classList.add('hidden', 'opacity-0');
+                document.getElementById('hudBottomButtons').classList.add('opacity-0', 'invisible');
+
+                this.enemies = []; this.enemiesToSpawn = []; this.projectiles = [];
+                document.getElementById('waveStartTitle').innerText = `WAVE ${waveNum}`;
+                showUI('waveStartModal');
+                setTimeout(() => hideUI('waveStartModal'), 1500);
+
+                const count = 6 + waveNum * 3;
+                const isBossWave = waveNum % 5 === 0;
+                for (let i = 0; i < count; i++) this.enemiesToSpawn.push({ isTank: waveNum >= 3 && i%4 === 0, isBoss: false });
+                if (isBossWave) this.enemiesToSpawn.push({ isTank: false, isBoss: true });
+                
+                this.spawnInterval = Math.max(0.3, 1.3 - (waveNum * 0.08));
+                this.spawnTimer = 1.6;
+            }
+
+            enterPrepPhase() {
+                this.inPrepPhase = true;
+                this.prepTimer = 60;
+                this.player.hp = Math.min(this.player.getMaxHp(), this.player.hp + Math.round(this.player.getMaxHp() * 0.25));
+                
+                if (activeSlotIndex !== null) {
+                    const slots = getSlotsData();
+                    if (slots[activeSlotIndex]) {
+                        slots[activeSlotIndex].currentWave = this.currentWave + 1;
+                        slots[activeSlotIndex].player.level = this.player.level;
+                        slots[activeSlotIndex].player.xp = this.player.xp;
+                        slots[activeSlotIndex].player.gold = this.player.gold;
+                        slots[activeSlotIndex].player.inventory = this.player.inventory;
+                        slots[activeSlotIndex].player.equipment = this.player.equipment;
+                        saveSlotsData(slots);
+                    }
+                }
+
+                const banner = document.getElementById('waveBanner');
+                banner.classList.remove('hidden', 'opacity-0');
+                document.getElementById('hudBottomButtons').classList.remove('opacity-0', 'invisible');
+            }
+
+            skipWaveWait() {
+                if (!this.inPrepPhase) return;
+                this.startWave(this.currentWave + 1);
+            }
+
+            spawnSingleEnemy(isTank, isBoss) {
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 420 + Math.random() * 120;
+                this.enemies.push({
+                    x: this.player.x + Math.cos(angle) * (isBoss ? 500 : dist),
+                    y: this.player.y + Math.sin(angle) * (isBoss ? 500 : dist),
+                    radius: isBoss ? 34 : (isTank ? 22 : 16),
+                    hp: isBoss ? 450 + this.currentWave * 95 : (isTank ? 95 : 45) + this.currentWave * 18,
+                    maxHp: isBoss ? 450 + this.currentWave * 95 : (isTank ? 95 : 45) + this.currentWave * 18,
+                    speed: isBoss ? 95 : (isTank ? 75 : 115) + this.currentWave * 2,
+                    damage: isBoss ? 28 : (isTank ? 18 : 10) + this.currentWave * 2,
+                    color: isBoss ? '#facc15' : (isTank ? '#9333ea' : '#ef4444'),
+                    isBoss: isBoss, isTank: isTank
+                });
+            }
+
+            playerPrimaryAttack() {
+                const p = this.player;
+                if (!p || p.attackCooldown > 0 || p.specialActive) return;
+                
+                p.attackCooldown = 0.32;
+                const baseDmg = Math.round(32 * p.getDamageMultiplier());
+                SoundFX.play('C4', '32n');
+
+                if (p.classType === 'warrior') {
+                    this.slashEffects.push({ x: p.x, y: p.y, angle: p.facingAngle, timer: 0.18 });
+                    this.enemies.forEach(en => {
+                        const dx = en.x - p.x; const dy = en.y - p.y;
+                        const dist = Math.hypot(dx, dy);
+                        if (dist <= 95 + en.radius) {
+                            const angleDiff = Math.abs(Math.atan2(Math.sin(Math.atan2(dy, dx) - p.facingAngle), Math.cos(Math.atan2(dy, dx) - p.facingAngle)));
+                            if (angleDiff <= Math.PI * 0.55) en.hp -= baseDmg;
+                        }
+                    });
+                } else if (p.classType === 'archer') {
+                    this.projectiles.push({
+                        x: p.x, y: p.y, vx: Math.cos(p.facingAngle) * 720, vy: Math.sin(p.facingAngle) * 720,
+                        radius: 6, damage: baseDmg, color: '#34d399', life: 1.4, pierce: 1
+                    });
+                } else if (p.classType === 'mage') {
+                    const elemColors = { fire: '#ef4444', water: '#38bdf8', earth: '#d97706', air: '#a7f3d0' };
+                    const col = elemColors[p.mageElement] || '#ef4444';
+                    if (p.mageShape === 1) {
+                        this.projectiles.push({ x: p.x, y: p.y, vx: Math.cos(p.facingAngle)*650, vy: Math.sin(p.facingAngle)*650, radius: 8, damage: baseDmg, color: col, life: 1.5, pierce: 1 });
+                    } else if (p.mageShape === 2) {
+                        [-0.2, 0, 0.2].forEach(off => {
+                            this.projectiles.push({ x: p.x, y: p.y, vx: Math.cos(p.facingAngle+off)*600, vy: Math.sin(p.facingAngle+off)*600, radius: 7, damage: Math.round(baseDmg*0.65), color: col, life: 1.3, pierce: 1 });
+                        });
+                    } else if (p.mageShape === 3) {
+                        this.projectiles.push({ x: p.x, y: p.y, vx: Math.cos(p.facingAngle)*460, vy: Math.sin(p.facingAngle)*460, radius: 16, damage: Math.round(baseDmg*1.4), color: col, life: 1.8, pierce: 5 });
+                    } else {
+                        this.projectiles.push({ x: p.x, y: p.y, vx: Math.cos(p.facingAngle)*500, vy: Math.sin(p.facingAngle)*500, radius: 12, damage: Math.round(baseDmg*1.6), color: col, life: 1.2, pierce: 1, explode: true });
+                    }
+                }
+            }
+
+            playerSpecialAttack() {
+                const p = this.player;
+                if (p.specialCharge < 100 || p.specialActive) return;
+                p.specialCharge = 0; p.specialActive = true; p.specialTimer = 2.2;
+                SoundFX.play('G5', '8n');
+
+                if (p.classType === 'warrior') {
+                    p.bladeObj = {
+                        x: p.x, y: p.y, speed: 620, radius: 22, hitCooldowns: new Map(), returnPhase: false
+                    };
+                } else {
+                    p.specialActive = false;
+                    const dmg = Math.round(120 * p.getDamageMultiplier());
+                    this.projectiles.push({
+                        x: p.x, y: p.y, vx: Math.cos(p.facingAngle) * 780, vy: Math.sin(p.facingAngle) * 780,
+                        radius: 22, damage: dmg, color: p.classType === 'mage' ? '#a855f7' : '#facc15', life: 2.0, pierce: 99
+                    });
+                }
+            }
+
+            rollChestRarity() {
+                const total = RARITIES.reduce((s, r) => s + r.weight, 0);
+                let roll = Math.random() * total;
+                for (let r of RARITIES) {
+                    if (roll < r.weight) return r;
+                    roll -= r.weight;
+                }
+                return RARITIES[0];
+            }
+
+            update(dt) {
+                if (!this.isRunning || this.isPaused || !this.player) return;
+                const p = this.player;
+
+                if (p.attackCooldown > 0) p.attackCooldown -= dt;
+                if (p.invulnTimer > 0) p.invulnTimer -= dt;
+                p.stamina = Math.min(p.getMaxStamina(), p.stamina + 20 * dt);
+                p.specialCharge = Math.min(100, p.specialCharge + 8 * dt);
+
+                let mx = 0; let my = 0;
+                if (this.keys['w'] || this.keys['arrowup']) my -= 1;
+                if (this.keys['s'] || this.keys['arrowdown']) my += 1;
+                if (this.keys['a'] || this.keys['arrowleft']) mx -= 1;
+                if (this.keys['d'] || this.keys['arrowright']) mx += 1;
+                if (mx !== 0 || my !== 0) { const len = Math.hypot(mx,my); mx/=len; my/=len; p.isMoving=true; } else p.isMoving=false;
+                
+                p.x += mx * p.getMoveSpeed() * dt; p.y += my * p.getMoveSpeed() * dt;
+                p.facingAngle = Math.atan2(this.mouse.y - this.height/2, this.mouse.x - this.width/2);
+
+                if (this.mouse.down) this.playerPrimaryAttack();
+
+                // Efeitos de corte
+                for (let i = this.slashEffects.length - 1; i >= 0; i--) {
+                    this.slashEffects[i].timer -= dt;
+                    if (this.slashEffects[i].timer <= 0) this.slashEffects.splice(i, 1);
+                }
+
+                // Projéteis
+                for (let i = this.projectiles.length - 1; i >= 0; i--) {
+                    const pr = this.projectiles[i];
+                    pr.x += pr.vx * dt; pr.y += pr.vy * dt; pr.life -= dt;
+                    if (pr.life <= 0) { this.projectiles.splice(i, 1); continue; }
+                    for (let en of this.enemies) {
+                        if (Math.hypot(en.x - pr.x, en.y - pr.y) <= en.radius + pr.radius) {
+                            en.hp -= pr.damage;
+                            pr.pierce--;
+                            if (pr.pierce <= 0) { this.projectiles.splice(i, 1); break; }
+                        }
+                    }
+                }
+
+                // Spawn Gradual
+                if (this.enemiesToSpawn.length > 0) {
+                    this.spawnTimer -= dt;
+                    if (this.spawnTimer <= 0) {
+                        this.spawnTimer = this.spawnInterval;
+                        const nextEn = this.enemiesToSpawn.shift();
+                        this.spawnSingleEnemy(nextEn.isTank, nextEn.isBoss);
+                    }
+                }
+
+                // Especial Guerreiro (Espada Giratória)
+                if (p.specialActive && p.bladeObj) {
+                    const b = p.bladeObj;
+                    p.specialTimer -= dt;
+                    if (p.specialTimer <= 0) b.returnPhase = true;
+
+                    if (!b.returnPhase) {
+                        const mWorldX = this.mouse.x + (p.x - this.width/2);
+                        const mWorldY = this.mouse.y + (p.y - this.height/2);
+                        const dx = mWorldX - b.x; const dy = mWorldY - b.y;
+                        const d = Math.hypot(dx, dy);
+                        if (d > 5) {
+                            b.x += (dx/d) * b.speed * dt;
+                            b.y += (dy/d) * b.speed * dt;
+                        }
+                    } else {
+                        const dx = p.x - b.x; const dy = p.y - b.y;
+                        const dist = Math.hypot(dx,dy);
+                        if (dist < 24) { p.specialActive = false; p.bladeObj = null; }
+                        else {
+                            b.x += (dx/dist) * (b.speed * 1.5) * dt;
+                            b.y += (dy/dist) * (b.speed * 1.5) * dt;
+                        }
+                    }
+
+                    if (b) {
+                        this.enemies.forEach(en => {
+                            if (Math.hypot(en.x - b.x, en.y - b.y) <= en.radius + b.radius) {
+                                const lastHit = b.hitCooldowns.get(en) || 0;
+                                if (this.lastTime - lastHit > 120) {
+                                    en.hp -= Math.round(18 * p.getDamageMultiplier());
+                                    b.hitCooldowns.set(en, this.lastTime);
+                                }
+                            }
+                        });
+                    }
+                }
+
+                // Inimigos
+                for (let i = this.enemies.length - 1; i >= 0; i--) {
+                    const en = this.enemies[i];
+                    if (en.hp <= 0) {
+                        p.xp += en.isBoss ? 120 : (en.isTank ? 35 : 15);
+                        p.gold += en.isBoss ? 80 : (en.isTank ? 18 : 8);
+                        if (p.xp >= p.nextXp) {
+                            p.level++; p.xp -= p.nextXp; p.nextXp = Math.round(p.nextXp * 1.35);
+                            p.statPoints += 2;
+                            p.hp = p.getMaxHp();
+                        }
+                        const dropChance = en.isBoss ? 1.0 : (en.isTank ? 0.35 : 0.14);
+                        if (Math.random() < dropChance) {
+                            this.chestDrops.push({ x: en.x, y: en.y, rarity: this.rollChestRarity() });
+                        }
+                        this.enemies.splice(i, 1); continue;
+                    }
+                    const dist = Math.hypot(p.x - en.x, p.y - en.y);
+                    if (dist > 0) {
+                        en.x += ((p.x - en.x) / dist) * en.speed * dt;
+                        en.y += ((p.y - en.y) / dist) * en.speed * dt;
+                    }
+                    
+                    if (dist <= en.radius + p.radius && p.invulnTimer <= 0) {
+                        p.hp -= en.damage; p.invulnTimer = 0.65;
+                        const flash = document.getElementById('damage-flash');
+                        flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 120);
+                        if (p.hp <= 0) { this.isRunning = false; showUI('gameOverModal'); }
+                    }
+                }
+
+                if (this.inPrepPhase) {
+                    this.prepTimer -= dt;
+                    document.getElementById('waveTimer').innerText = Math.max(0, Math.ceil(this.prepTimer));
+                    if (this.prepTimer <= 0) this.skipWaveWait();
+                } else if (this.enemies.length === 0 && this.enemiesToSpawn.length === 0) {
+                    this.enterPrepPhase();
+                }
+
+                this.updateHUD();
+            }
+
+            drawOldPixelPlayer(ctx, p) {
+                ctx.save(); ctx.translate(p.x, p.y);
+                const facingLeft = Math.cos(p.facingAngle) < 0;
+                if (facingLeft) ctx.scale(-1, 1);
+                
+                const px = 3; const ox = -6 * px; const oy = -9 * px;
+                const b = (gx,gy,gw,gh,col) => { ctx.fillStyle = col; ctx.fillRect(ox + gx*px, oy + gy*px, gw*px, gh*px); };
+                const tunic = p.classType === 'mage' ? '#2563eb' : (p.classType === 'archer' ? '#059669' : '#dc2626');
+                
+                b(4,1,4,4,'#fed7aa'); b(5,2,1,1,'#000'); b(7,2,1,1,'#000');
+                b(4,0,4,1,'#111827'); b(3,1,1,1,'#ef4444'); b(8,1,1,1,'#ef4444');
+                b(2,5,2,6,tunic); b(4,5,5,5,tunic); b(4,10,5,1,'#facc15');
+                b(4,11,2,3,'#1e293b'); b(7,11,2,3,'#1e293b');
+                b(4,14,2,2,'#78350f'); b(7,14,2,2,'#78350f');
+                ctx.restore();
+
+                if (!p.specialActive) {
+                    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.facingAngle);
+                    ctx.fillStyle = '#78350f'; ctx.fillRect(14, -2, 8, 4);
+                    ctx.fillStyle = '#facc15'; ctx.fillRect(20, -6, 3, 12);
+                    ctx.fillStyle = '#e2e8f0'; ctx.fillRect(23, -2, 18, 4);
+                    ctx.restore();
+                }
+            }
+            
+            drawChest(ctx, c) {
+                const rarityColor = c.rarity ? c.rarity.color : '#facc15';
+                ctx.save(); ctx.translate(c.x, c.y);
+                
+                ctx.beginPath();
+                ctx.ellipse(0, 8, 26, 10, 0, 0, Math.PI * 2);
+                ctx.fillStyle = rarityColor;
+                ctx.globalAlpha = 0.35;
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+
+                const px = 2.5; const ox = -8 * px; const oy = -8 * px;
+                const b = (gx,gy,gw,gh,col) => { ctx.fillStyle = col; ctx.fillRect(ox + gx*px, oy + gy*px, gw*px, gh*px); };
+
+                b(0,0,16,14, rarityColor);
+                b(1,1,14,12,'#78350f');
+                b(1,6,14,2, rarityColor);
+                b(1,8,14,5,'#450a0a');
+                b(6,4,4,5,'#facc15');
+                b(7,5,2,2,'#450a0a');
+
+                if (this.player && Math.hypot(this.player.x - c.x, this.player.y - c.y) < 65) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 12px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`[E] BAÚ ${c.rarity.name}`, 0, -26);
+                }
+                ctx.restore();
+            }
+
+            render() {
+                const ctx = this.ctx;
+                const biome = this.currentWave >= 6 ? BIOMES[1] : BIOMES[0];
+                ctx.fillStyle = biome.bg; ctx.fillRect(0,0,this.width,this.height);
+                const camX = this.player.x - this.width/2; const camY = this.player.y - this.height/2;
+                ctx.save(); ctx.translate(-camX, -camY);
+
+                // Grid do chão
+                ctx.strokeStyle = biome.grid;
+                ctx.lineWidth = 2;
+                const gridSize = 64;
+                const startX = Math.floor(camX / gridSize) * gridSize;
+                const startY = Math.floor(camY / gridSize) * gridSize;
+                for (let x = startX; x < camX + this.width + gridSize; x += gridSize) {
+                    ctx.beginPath(); ctx.moveTo(x, camY); ctx.lineTo(x, camY + this.height); ctx.stroke();
+                }
+                for (let y = startY; y < camY + this.height + gridSize; y += gridSize) {
+                    ctx.beginPath(); ctx.moveTo(camX, y); ctx.lineTo(camX + this.width, y); ctx.stroke();
+                }
+
+                this.chestDrops.forEach(c => this.drawChest(ctx, c));
+
+                this.slashEffects.forEach(s => {
+                    ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.angle);
+                    ctx.strokeStyle = 'rgba(56, 189, 248, 0.7)';
+                    ctx.lineWidth = 14;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 75, -Math.PI * 0.45, Math.PI * 0.45);
+                    ctx.stroke();
+                    ctx.restore();
+                });
+
+                this.projectiles.forEach(pr => {
+                    ctx.fillStyle = pr.color;
+                    ctx.beginPath(); ctx.arc(pr.x, pr.y, pr.radius, 0, Math.PI * 2); ctx.fill();
+                });
+
+                this.enemies.forEach(en => {
+                    ctx.fillStyle = en.color; ctx.beginPath(); ctx.arc(en.x, en.y, en.radius, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = '#000'; ctx.fillRect(en.x - 18, en.y - en.radius - 10, 36, 5);
+                    ctx.fillStyle = '#22c55e'; ctx.fillRect(en.x - 18, en.y - en.radius - 10, 36 * Math.max(0, en.hp / en.maxHp), 5);
+                });
+
+                if (this.player.bladeObj) {
+                    const b = this.player.bladeObj;
+                    ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(performance.now() * 0.025);
+                    ctx.fillStyle = '#facc15'; ctx.fillRect(-18,-4,36,8);
+                    ctx.fillStyle = '#ef4444'; ctx.fillRect(-4,-18,8,36);
+                    ctx.restore();
+                }
+
+                this.drawOldPixelPlayer(ctx, this.player);
+                ctx.restore();
+            }
+
+            updateHUD() {
+                const p = this.player;
+                const biome = this.currentWave >= 6 ? BIOMES[1] : BIOMES[0];
+                document.getElementById('hudBiomeBadge').innerText = biome.name;
+                document.getElementById('hudPlayerLevel').innerText = p.level;
+                document.getElementById('xpBar').style.width = `${Math.min(100, (p.xp / p.nextXp) * 100)}%`;
+                document.getElementById('xpText').innerText = `${p.xp} / ${p.nextXp} XP`;
+                document.getElementById('hudWaveTitle').innerText = `HORDA ${this.currentWave}`;
+                document.getElementById('hudEnemiesLeft').innerText = `INIMIGOS: ${this.enemies.length + this.enemiesToSpawn.length}`;
+                document.getElementById('hpBar').style.width = `${Math.max(0, p.hp/p.getMaxHp()*100)}%`;
+                document.getElementById('hpText').innerText = `${Math.max(0, Math.round(p.hp))} / ${p.getMaxHp()} HP`;
+                document.getElementById('resourceBar').style.width = `${Math.round(p.stamina/p.getMaxStamina()*100)}%`;
+                document.getElementById('resourceText').innerText = `STAMINA: ${Math.round(p.stamina)}`;
+                document.getElementById('specialBar').style.width = `${Math.round(p.specialCharge)}%`;
+                document.getElementById('specialText').innerText = p.specialCharge >= 100 ? 'ESPECIAL (E): PRONTO' : `ESPECIAL (E): ${Math.round(p.specialCharge)}%`;
+
+                const statBadge = document.getElementById('statPointsBadge');
+                const btnStatUp = document.getElementById('btnStatUp');
+                if (p.statPoints > 0) {
+                    statBadge.classList.remove('hidden');
+                    statBadge.innerText = `+${p.statPoints}`;
+                    btnStatUp.classList.remove('hidden');
+                } else {
+                    statBadge.classList.add('hidden');
+                    btnStatUp.classList.add('hidden');
+                }
+            }
+        }
+
+        const game = new GameEngine();
+        function mainLoop(time) {
+            const dt = Math.min(0.05, Math.max(0, (time - (game.lastTime||time))/1000));
+            game.lastTime = time;
+            if (game.isRunning) { game.update(dt); game.render(); }
+            requestAnimationFrame(mainLoop);
+        }
+        window.onload = () => requestAnimationFrame(mainLoop);
+    </script>
+</body>
+</html>
